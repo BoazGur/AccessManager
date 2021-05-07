@@ -1,12 +1,16 @@
 import socket
+import select
 import tkinter as tk
 import tkinter.font as tkFont
-import select
+import sqlite3
 
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
+
+
+
 
 
 #To do :always on - turns on restart
@@ -46,18 +50,19 @@ class ServerUI():
     def main_window(self):
         window = tk.Tk()
 
-        frame1 = tk.Frame(master=window, height=40, bg="red")
-        frame1.pack(fill=tk.X, expand=True)
+        #-------------------- Welcome Sign
+        frame1 = tk.Frame(master=window, height=35 ,bg="red")
+        frame1.pack(fill=tk.BOTH)
 
-        fnt_welcome = tkFont.Font(family="Lucidia Grande", size=35)
+        fnt_welcome = tkFont.Font(size=35)
         lbl_welcome = tk.Label(master=frame1, text="Welcome Manager", font=fnt_welcome)
         lbl_welcome.pack()
 
+        #-------------------- User Buttons
         frame2 = tk.Frame(master=window, width=100, bg="yellow")
         frame2.pack(fill=tk.BOTH, expand=True)
 
-        frame3 = tk.Frame(master=window, width=50, bg="blue")
-        frame3.pack(fill=tk.BOTH, expand=True)
+
 
         window.geometry("800x700")
         window.mainloop()
