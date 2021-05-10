@@ -1,5 +1,19 @@
-import sqlite3
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+import socket
+import browserhistory as bh
 
-con = sqlite3.connect('mydatabase.db')
-c = con.cursor()
-c.execute("INSERT INTO meow VALUES(?, ?, ?)",(1, "kotik_sem", 5))
+def host_name():
+    print(socket.gethostname())
+
+def history():
+    print(bh.get_browserhistory())
+    #bh.write_browserhistory_csv()
+    #file=open("Browserhistory.txt","wt",encoding="utf-8")
+def main(): 
+    #karl().mainloop()
+    #host_name()
+    history()
+if __name__ == '__main__':
+    main()
