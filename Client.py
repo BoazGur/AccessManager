@@ -1,4 +1,5 @@
 import socket
+import browserhistory as bh
 from datetime import datetime as dt
 import time
 
@@ -7,11 +8,19 @@ window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
 
-#To do :always on - turns on restart
-class Client():
-    def __init__(self, port=8880, ip="0.0.0.0"):
-        pass
 
+class Client():#To do :always on - turns on restart
+    def __init__(self, port=8810, ip="0.0.0.0"):
+        self.s = socket.socket()
+        self.s.connect((ip,port))
+        print("connected")# to be deleted     
+    
+    def first_message(self):
+        self.s.send(socket.gethostname().encode())
+        
+    def info(self):
+        pass
+   
     def block_websites(self, start_hour , end_hour):
         while True:
             if dt(dt.now().year, dt.now().month, dt.now().day, start_hour) < dt.now() < dt(dt.now().year, dt.now().month, dt.now().day, end_hour): # fuck off go to work
@@ -33,7 +42,7 @@ class Client():
             time.sleep(3)
 
 def main():
-    ui = Client()
+   client = Client()
     
 if __name__ == "__main__":
     main()
