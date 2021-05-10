@@ -1,7 +1,9 @@
 import socket
 import select
 from ServerUI import *
+
 MAX_MESSAGE_LENGTH = 1024
+opening_msg = "ok"
 
 class Server():#To do :always on - turns on restart
     def __init__(self, port=8810, ip="0.0.0.0"):
@@ -27,15 +29,12 @@ class Server():#To do :always on - turns on restart
         for self.current_socket in rlist:
             if self.current_socket is self.server_socket:
                 connection = self.create_connection()
-                self.messages_to_send.append((connection, opening_msg))
+                self.messages_to_send.append((connection, "opening_msg"))
             else:
                 print("Data from existing client")
                 data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
-                splited_data=data.split("%")
                 if data == "exit":
                     self.exit()
-                elif data[:6] == "upload":
-                    self.upload(data)
                 else:
                     self.messages_to_send.append((self.current_socket, data))
                     
@@ -47,12 +46,6 @@ class Server():#To do :always on - turns on restart
                 
                 if data == opening_msg:
                     self.current_socket.send(opening_msg.encode())
-                elif request[0] in self.start:
-                    self.start[request[0]](request[1],request[2])
-                elif data in self.action:
-                    self.action[data]()
-                elif request[0] in self.action:
-                    self.action[request[0]](data)
                 else:
                     self.current_socket.send("[Error]: Unknown command".encode())  # can not run self.promblem beacuse it wiil get stuck
                 self.messages_to_send.remove(message)

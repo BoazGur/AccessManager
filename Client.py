@@ -15,7 +15,7 @@ class Client():#To do :always on - turns on restart
         print("connected")# to be deleted     
     
     def first_message(self):
-        self.s.send(f"name:{socket.gethostname()}".encode())
+        self.s.send(f"name%{socket.gethostname()}".encode())
         
     def info(self):
         pass
