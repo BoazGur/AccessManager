@@ -3,7 +3,6 @@ import tkinter.font as tkFont
 
 LARGE_FONT = ("Verdana", 20)
 
-
 class ServerUI(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)

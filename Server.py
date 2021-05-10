@@ -38,7 +38,6 @@ def main():
     """server=Server()
     server.Get_requests()
     server.close()"""
-
     ui = ServerUI()
     ui.main_window()
 
@@ -47,6 +46,6 @@ if __name__=="__main__":
     
     
     
+  
     
-    
-    
+
