@@ -1,7 +1,9 @@
 import socket
-import tkinter as tk
-import tkinter.font as tkFont
 import select
+import sqlite3
+
+conn = sqlite3.connect("manager.db")
+c = conn.cursor()
 
 #To do :always on - turns on restart
 class Server():
@@ -33,13 +35,21 @@ class Server():
         self.server_soc.close()
 
 
+def create_name_table(name):
+    c.execute(f"""CREATE TABLE {name} (
+        url text,
+        name text, 
+        date text,
+        blocked boolean,
+        perm boolean,
+        start text,
+        end text
+    """)
 
 def main():
     """server=Server()
     server.Get_requests()
     server.close()"""
-    ui = ServerUI()
-    ui.main_window()
 
 if __name__=="__main__":
     main()
