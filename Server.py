@@ -1,9 +1,6 @@
 import socket
 import select
-import sqlite3
 
-conn = sqlite3.connect("manager.db")
-c = conn.cursor()
 
 #To do :always on - turns on restart
 class Server():
@@ -33,18 +30,6 @@ class Server():
 
     def close(self):
         self.server_soc.close()
-
-
-def create_name_table(name):
-    c.execute(f"""CREATE TABLE {name} (
-        url text,
-        name text, 
-        date text,
-        blocked boolean,
-        perm boolean,
-        start text,
-        end text
-    """)
 
 def main():
     """server=Server()
