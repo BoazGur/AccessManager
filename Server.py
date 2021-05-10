@@ -33,29 +33,6 @@ class Server():
         self.server_soc.close()
 
 
-class ServerUI():
-    def __init__(self):
-        pass
-    
-    def main_window(self):
-        window = tk.Tk()
-
-        frame1 = tk.Frame(master=window, height=40, bg="red")
-        frame1.pack(fill=tk.X, expand=True)
-
-        fnt_welcome = tkFont.Font(family="Lucidia Grande", size=35)
-        lbl_welcome = tk.Label(master=frame1, text="Welcome Manager", font=fnt_welcome)
-        lbl_welcome.pack()
-
-        frame2 = tk.Frame(master=window, width=100, bg="yellow")
-        frame2.pack(fill=tk.BOTH, expand=True)
-
-        frame3 = tk.Frame(master=window, width=50, bg="blue")
-        frame3.pack(fill=tk.BOTH, expand=True)
-
-        window.geometry("800x700")
-        window.mainloop()
-
 
 def main():
     """server=Server()
