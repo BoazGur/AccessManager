@@ -8,8 +8,10 @@ def host_name():
     print(socket.gethostname())
 
 def history():
-    #print(bh.get_browserhistory())
-    print(bh.get_database_paths())
+    print(bh.get_browserhistory())
+    #print(bh.get_database_paths())
+    #print(bh.get_username())
+    
     #bh.write_browserhistory_csv()
     #file=open("Browserhistory.txt","wt",encoding="utf-8")
 def main(): 

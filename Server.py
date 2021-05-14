@@ -1,9 +1,12 @@
 import socket
 import select
+import browserhistory as bh
+import pandas as pd
 from ServerUI import *
 
 MAX_MESSAGE_LENGTH = 1024
 opening_msg = "ok"
+
 
 class Server():#To do :always on - turns on restart
     def __init__(self, port=8810, ip="0.0.0.0"):
@@ -13,10 +16,10 @@ class Server():#To do :always on - turns on restart
         print("[Server]: Server is up and running")
         
         self.open_client_sockets = []
-        self.messages_to_send = [] # [(self.current_socket, last data from client, last data from server)]
+        self.messages_to_send = [] # [(self.current_socket, last data from client)]
         self.current_socket = None
         
-        self.action = {"get_photo_names": self.get_photo_names, "download": self.download}
+        self.action = {opening_msg: self.current_socket.send(opening_msg.encode()) , "history": self.history}
          
     def get_requests(self):
           while True:
@@ -29,7 +32,7 @@ class Server():#To do :always on - turns on restart
         for self.current_socket in rlist:
             if self.current_socket is self.server_socket:
                 connection = self.create_connection()
-                self.messages_to_send.append((connection, "opening_msg"))
+                self.messages_to_send.append((connection, opening_msg))
             else:
                 print("Data from existing client")
                 data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
@@ -43,15 +46,16 @@ class Server():#To do :always on - turns on restart
             self.current_socket, data = message
             if self.current_socket in wlist:
                 request = data.split("%")
-                
+                if request[0]=="name":# add name to table
+                    pass
+                   
                 if data == opening_msg:
-                    self.current_socket.send(opening_msg.encode())
+                    
                 else:
+                    
                     self.current_socket.send("[Error]: Unknown command".encode())  # can not run self.promblem beacuse it wiil get stuck
                 self.messages_to_send.remove(message)
-                
-           
-
+    
     def create_connection(self):
         connection, client_address = self.current_socket.accept()
         self.print_message("has joined!", client_address)

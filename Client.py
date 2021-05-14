@@ -18,8 +18,9 @@ class Client():#To do :always on - turns on restart
         self.s.send(f"name%{socket.gethostname()}".encode())
         
     def info(self):
-        pass
-   
+        for line in open("my.csv"):
+            self.s.send(line)
+            
     def block_websites(self, start_hour , end_hour):
         while True:
             if dt(dt.now().year, dt.now().month, dt.now().day, start_hour) < dt.now() < dt(dt.now().year, dt.now().month, dt.now().day, end_hour): # fuck off go to work
@@ -41,6 +42,9 @@ class Client():#To do :always on - turns on restart
             time.sleep(3)
 
 def main():
-   client = Client()   
+   client = Client()
+   client.first_message()
+   client.info()
+     
 if __name__ == "__main__":
     main()
