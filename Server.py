@@ -1,12 +1,11 @@
-import socket
-import select
+import socket,select
 import browserhistory as bh
 import pandas as pd
 from ServerUI import *
 
 MAX_MESSAGE_LENGTH = 1024
 opening_msg = "ok"
-
+names = pd.read_csv("database/names.csv")
 
 class Server():#To do :always on - turns on restart
     def __init__(self, port=8810, ip="0.0.0.0"):
@@ -32,7 +31,7 @@ class Server():#To do :always on - turns on restart
         for self.current_socket in rlist:
             if self.current_socket is self.server_socket:
                 connection = self.create_connection()
-                self.messages_to_send.append((connection, opening_msg))
+                self.messages_to_send.append((connection,""))
             else:
                 print("Data from existing client")
                 data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
@@ -47,12 +46,11 @@ class Server():#To do :always on - turns on restart
             if self.current_socket in wlist:
                 request = data.split("%")
                 if request[0]=="name":# add name to table
-                    pass
-                   
-                if data == opening_msg:
                     
-                else:
                     
+                elif data=="history":
+                    self.history()
+                else:                   
                     self.current_socket.send("[Error]: Unknown command".encode())  # can not run self.promblem beacuse it wiil get stuck
                 self.messages_to_send.remove(message)
     
@@ -61,7 +59,11 @@ class Server():#To do :always on - turns on restart
         self.print_message("has joined!", client_address)
         self.open_client_sockets.append(connection)
         
-    def print_message(self, message, client_address):
+    def history(self):
+        return "".join(iter(lambda:sock.recv(1),"\n"))
+    
+  
+    def print_message(self, message, client_address):# to be deleted
         print(f"[{client_address}] {message}")
 
     def exit(self):
@@ -73,11 +75,10 @@ class Server():#To do :always on - turns on restart
         self.server_soc.close()
 
 
-
 def main():
-    """server=Server()
+    server=Server()
     server.Get_requests()
-    server.close()"""
+    server.close()
 
 if __name__=="__main__":
     main()

