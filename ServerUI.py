@@ -1,7 +1,11 @@
+from tkinter import *
 import tkinter as tk
 import tkinter.font as tkFont
+from tkinter import ttk
+from tkinter import messagebox
 import pandas as pd
 from functools import partial
+import os
 from Server import *
 
 LARGE_FONT = ("Verdana", 20)
@@ -9,7 +13,11 @@ LARGE_FONT = ("Verdana", 20)
 names = pd.read_csv("database/names.csv")
 user = pd.read_csv("database/user.csv")
 
-print(names)
+data = {}
+for file in os.listdir("database/names/"):
+    filename = file.split(".")[0]
+    data[filename] = pd.read_csv(f"database/names/{file}")
+    data[filename].index += 1
 
 lst_names = [""] + names["name"].tolist()
 
@@ -79,7 +87,18 @@ class PageOne(tk.Frame):
     def __init__(self, parent, controller, name):
         tk.Frame.__init__(self, parent)
         self.name = name
+        self.data = data[name]
+        self.search_val = StringVar()
+        self.id_val = StringVar()
+        self.url_val = StringVar()
+        self.name_val = StringVar()
+        self.date_val = StringVar()
+        self.blocked_val = StringVar()
+        self.perm_val = StringVar()
+        self.start_val = StringVar()
+        self.end_val = StringVar()
 
+        #-----------------------Welcome to name frame
         frame1 = tk.Frame(self, height=35, bg="pink")
         frame1.pack(fill="both")
 
@@ -89,8 +108,164 @@ class PageOne(tk.Frame):
 
         label = tk.Label(frame1, text=f"HELLO {name}!!!!", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
+    
+        #-----------------------Table and More
+        frame2 = tk.Frame(self, bg="cyan")
+        frame2.pack(fill="both", expand=True)
 
+        wrapper1 = tk.LabelFrame(frame2, text="Browse History And Blocked Sites")
+        wrapper2 = tk.LabelFrame(frame2, text="Search")
+        wrapper3 = tk.LabelFrame(frame2, text="Blocked Site Data")
+
+        wrapper1.pack(fill="both", expand=True, padx=20, pady=10)
+        wrapper2.pack(fill="both", expand=True, padx=20, pady=10)
+        wrapper3.pack(fill="both", expand=True, padx=20, pady=10)
+
+        #-----Table
+        self.trv = ttk.Treeview(wrapper1, columns=(1, 2, 3, 4, 5, 6, 7, 8), show="headings", height=6)
+        self.trv.pack()
+
+        self.trv.heading(1, text="ID")
+        self.trv.heading(2, text="URL")
+        self.trv.heading(3, text="Site Name")
+        self.trv.heading(4, text="Date")
+        self.trv.heading(5, text="Blocked")
+        self.trv.heading(6, text="Permanent")
+        self.trv.heading(7, text="Start")
+        self.trv.heading(8, text="End")
+
+        self.trv.bind("<Double 1>", self.get_row)
+
+        self.clear()
+
+        #-----Search
+        lbl_search = tk.Label(wrapper2, text="Search")
+        lbl_search.pack(side="left", padx=10)
+
+        ent_search = tk.Entry(wrapper2, textvariable=self.search_val)
+        ent_search.pack(side="left", padx=6)
+
+        btn_search = tk.Button(wrapper2, text="Search", command=self.search)
+        btn_search.pack(side="left", padx=6)
+
+        btn_clear = tk.Button(wrapper2, text="Clear", command=self.clear)
+        btn_clear.pack(side="left", padx=6)
+
+        #-----Blocked Site Data
+        lbl_id = tk.Label(wrapper3, text="ID")
+        lbl_id.grid(row=0, column=0, padx=5, pady=3)
+        ent_id = tk.Entry(wrapper3, textvariable=self.id_val)
+        ent_id.grid(row=0, column=1, padx=5, pady=3)
+
+        lbl_url = tk.Label(wrapper3, text="URL")
+        lbl_url.grid(row=1, column=0, padx=5, pady=3)
+        ent_url = tk.Entry(wrapper3, textvariable=self.url_val)
+        ent_url.grid(row=1, column=1, padx=5, pady=3)
+        
+        lbl_name = tk.Label(wrapper3, text="Name")
+        lbl_name.grid(row=2, column=0, padx=5, pady=3)
+        ent_name = tk.Entry(wrapper3, textvariable=self.name_val)
+        ent_name.grid(row=2, column=1, padx=5, pady=3)
+
+        lbl_date = tk.Label(wrapper3, text="Date")
+        lbl_date.grid(row=3, column=0, padx=5, pady=3)
+        ent_date = tk.Entry(wrapper3, textvariable=self.date_val)
+        ent_date.grid(row=3, column=1, padx=5, pady=3)
+
+        lbl_blocked = tk.Label(wrapper3, text="Blocked")
+        lbl_blocked.grid(row=4, column=0, padx=5, pady=3)
+        ent_blocked = tk.Entry(wrapper3, textvariable=self.blocked_val)
+        ent_blocked.grid(row=4, column=1, padx=5, pady=3)
+
+        lbl_perm = tk.Label(wrapper3, text="Permanent")
+        lbl_perm.grid(row=5, column=0, padx=5, pady=3)
+        ent_perm = tk.Entry(wrapper3, textvariable=self.perm_val)
+        ent_perm.grid(row=5, column=1, padx=5, pady=3)
+
+        lbl_start = tk.Label(wrapper3, text="Start")
+        lbl_start.grid(row=6, column=0, padx=5, pady=3)
+        ent_start = tk.Entry(wrapper3, textvariable=self.start_val)
+        ent_start.grid(row=6, column=1, padx=5, pady=3)
+
+        lbl_end = tk.Label(wrapper3, text="End")
+        lbl_end.grid(row=7, column=0, padx=5, pady=3)
+        ent_end = tk.Entry(wrapper3, textvariable=self.end_val)
+        ent_end.grid(row=7, column=1, padx=5, pady=3)
+
+        btn_update = tk.Button(wrapper3, text="Update", command=self.update_site)
+        btn_add = tk.Button(wrapper3, text="Add New", command=self.add_site)
+        btn_delete = tk.Button(wrapper3, text="Delete", command=self.delete_site)
+
+        btn_add.grid(row=8, column=0, padx=5, pady=3)
+        btn_update.grid(row=8, column=1, padx=5, pady=3)
+        btn_delete.grid(row=8, column=2, padx=5, pady=3)
+
+    def delete_site(self):
+        site_id = self.id_val.get()
+        if messagebox.askyesno("Confirm Delete?", "Are you sure you want to delete this site?"):
+            self.data = self.data[self.data.index != int(site_id)]
+            self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+            self.clear()
+        else:
+            return True
+
+    def add_site(self):
+        url = self.url_val.get()
+        name = self.name_val.get()
+        date = self.date_val.get()
+        blocked = self.date_val.get()
+        perm = self.perm_val.get()
+        start = self.start_val.get()
+        end = self.end_val.get()
+        
+        self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
+        self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+        self.clear()
+
+    def update_site(self):
+        id = self.id_val.get()
+        url = self.url_val.get()
+        name = self.name_val.get()
+        date = self.date_val.get()
+        blocked = self.date_val.get()
+        perm = self.perm_val.get()
+        start = self.start_val.get()
+        end = self.end_val.get()
+
+        if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
+            #TODO: write update func
+            
+            self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+            self.clear()
+        else:
+            return True
+
+    def get_row(self, event):
+        row_id = self.trv.identify_row(event.y)
+        item = self.trv.item(self.trv.focus())
+        self.id_val.set(item["values"][0])
+        self.url_val.set(item["values"][1])
+        self.name_val.set(item["values"][2])
+        self.date_val.set(item["values"][3])
+        self.blocked_val.set(item["values"][4])
+        self.perm_val.set(item["values"][5])
+        self.start_val.set(item["values"][6])
+        self.end_val.set(item["values"][7])
+
+    def clear(self):
+        self.update(self.data.itertuples())
+
+    def search(self):
+        search_val2 = self.search_val.get()
+        possible = self.data[self.data["name"].str.contains(search_val2)] 
+        self.update(possible.itertuples())
+
+    def update(self, rows):
+        self.trv.delete(*self.trv.get_children())
+        for i in rows:
+            self.trv.insert('', 'end', value=i)
 
 app = ServerUI()
-app.geometry("800x700")
+app.title("Access Manager")
+app.geometry("1700x800")
 app.mainloop()
