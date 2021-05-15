@@ -10,12 +10,17 @@ from Server import *
 
 LARGE_FONT = ("Verdana", 20)
 
+<<<<<<< HEAD
 names = pd.read_csv("database/names.csv")
+=======
+names = pd.read_csv(os.path.join("database","names.csv"))
+
+>>>>>>> f7115980eb245ff54e664033bb0afade08761f1a
 
 data = {}
-for file in os.listdir("database/names/"):
+for file in os.listdir(os.path.join("database","customer")):
     filename = file.split(".")[0]
-    data[filename] = pd.read_csv(f"database/names/{file}")
+    data[filename] = pd.read_csv(os.path.join("database","customer",f"{file}"))
     data[filename].index += 1
 
 lst_names = [""] + names["name"].tolist()
@@ -54,7 +59,7 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller, name=""):
         tk.Frame.__init__(self, parent)
         # -------------------- Welcome Sign
-        frame1 = tk.Frame(self, height=35, bg="red")
+        frame1 = tk.Frame(self, height=35, bg="#000018")
         frame1.pack(fill="both")
 
         fnt_welcome = tkFont.Font(size=35)
@@ -63,7 +68,7 @@ class StartPage(tk.Frame):
         lbl_welcome.pack()
 
         # -------------------- User Buttons
-        frame2 = tk.Frame(self, width=100, bg="yellow")
+        frame2 = tk.Frame(self, width=100, bg="#faffff")
         frame2.pack(fill="both", expand=True)
 
         btn_list = []
@@ -98,18 +103,18 @@ class PageOne(tk.Frame):
         self.end_val = StringVar()
 
         #-----------------------Welcome to name frame
-        frame1 = tk.Frame(self, height=35, bg="pink")
+        frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
 
         button1 = tk.Button(frame1, text="Back to Home",
                             command=lambda: controller.show_frame(0))
         button1.pack()
 
-        label = tk.Label(frame1, text=f"HELLO {name}!!!!", font=LARGE_FONT)
+        label = tk.Label(frame1, text=f"HELLO {name}", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
     
         #-----------------------Table and More
-        frame2 = tk.Frame(self, bg="cyan")
+        frame2 = tk.Frame(self, bg="#000009")
         frame2.pack(fill="both", expand=True)
 
         wrapper1 = tk.LabelFrame(frame2, text="Browse History And Blocked Sites")
@@ -219,6 +224,7 @@ class PageOne(tk.Frame):
         
         self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
         self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+        self.data.to_csv(os.path.join("database","names.csv",f"{self.name}.csv"), index=False)
         self.clear()
 
     def update_site(self):
@@ -232,9 +238,17 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
+            if blocked=="True" and self.data.loc[self.data.index==id].blocked=="False" :
+                if perm==True:
+                    Server.limitation(-1,25)
+                else:
+                    Server.limitation(start,end)
+            elif FALSE :
+                pass #TODO oposite 
+            
             #TODO: write update func
             
-            self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+            self.data.to_csv(os.path.join("database","names.csv",f"{self.name}.csv"), index=False)
             self.clear()
         else:
             return True
