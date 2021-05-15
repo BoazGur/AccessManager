@@ -1,24 +1,27 @@
-import socket,select
+import socket,select,os
 import browserhistory as bh
 import pandas as pd
-from ServerUI import *
+#from ServerUI import *
 
 MAX_MESSAGE_LENGTH = 1024
-opening_msg = "ok"
-names = pd.read_csv("database/names.csv")
+#names = pd.read_csv(r"D:\Python_Code_11\Access_Manager\database\names.csv")
+#names = pd.read_csv("database\\names.csv")
+names = pd.read_csv(os.path.join("database","names.csv"))
 
-class Server():#To do :always on - turns on restart
-    def __init__(self, port=8810, ip="0.0.0.0"):
-        self.server_soc = socket.socket()
-        self.server_soc.bind((ip, port))
-        self.server_soc.listen()
+class Server():#TODO :order to client,always on - turns on restart
+    def __init__(self, port=8810):
+        self.server_socket = socket.socket()
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        self.server_socket.bind((local_ip, port))
+        self.server_socket.listen()
         print("[Server]: Server is up and running")
         
         self.open_client_sockets = []
         self.messages_to_send = [] # [(self.current_socket, last data from client)]
         self.current_socket = None
         
-        self.action = {opening_msg: self.current_socket.send(opening_msg.encode()) , "history": self.history}
+        self.action = {"history": self.history}
          
     def get_requests(self):
           while True:
@@ -46,8 +49,7 @@ class Server():#To do :always on - turns on restart
             if self.current_socket in wlist:
                 request = data.split("%")
                 if request[0]=="name":# add name to table
-                    
-                    
+                    self.create_database(request)
                 elif data=="history":
                     self.history()
                 else:                   
@@ -58,11 +60,33 @@ class Server():#To do :always on - turns on restart
         connection, client_address = self.current_socket.accept()
         self.print_message("has joined!", client_address)
         self.open_client_sockets.append(connection)
-        
-    def history(self):
-        return "".join(iter(lambda:sock.recv(1),"\n"))
     
-  
+    def create_database(self,request):  
+        global names
+        if request[1] not in list(names["name"]):
+            names=names.append({"name":request[1]},ignore_index=True)
+            names.to_csv(os.path.join("database","names.csv"),index=False)
+        
+        df=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+        df.to_csv(os.path.join('database','customer',f"{request[1]}.csv"), index=False)
+            
+    def history(self):
+        path=os.path.join("chrome_history.csv")
+        with open(path, 'wb') as f:
+            while True:
+                file = self.current_socket.recv(1024)
+                if len(file) < 1024:
+                    break                 
+                f.write(file)
+        f.close()
+        print("succesfuly upload history")
+       
+    def limitation(self,start,end):
+        global wlist
+        if self.current_socket in wlist:# wiil handle it tommorow
+            self.current_socket.send(f"limitation%{start}{end}")
+         
+    
     def print_message(self, message, client_address):# to be deleted
         print(f"[{client_address}] {message}")
 
@@ -72,12 +96,11 @@ class Server():#To do :always on - turns on restart
         self.current_socket.close()
 
     def close(self):
-        self.server_soc.close()
-
+        self.server_socket.close()
 
 def main():
     server=Server()
-    server.Get_requests()
+    server.get_requests()
     server.close()
 
 if __name__=="__main__":

