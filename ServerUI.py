@@ -11,7 +11,6 @@ from Server import *
 LARGE_FONT = ("Verdana", 20)
 
 names = pd.read_csv("database/names.csv")
-user = pd.read_csv("database/user.csv")
 
 data = {}
 for file in os.listdir("database/names/"):
@@ -227,7 +226,7 @@ class PageOne(tk.Frame):
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
-        blocked = self.date_val.get()
+        blocked = self.blocked_val.get()
         perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
