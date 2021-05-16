@@ -11,12 +11,8 @@ from  urllib import  request
 
 LARGE_FONT = ("Verdana", 20)
 
-<<<<<<< HEAD
-names = pd.read_csv("database/names.csv")
-=======
 names = pd.read_csv(os.path.join("database","names.csv"))
 
->>>>>>> f7115980eb245ff54e664033bb0afade08761f1a
 
 data = {}
 for file in os.listdir(os.path.join("database","customer")):
