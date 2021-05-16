@@ -223,9 +223,9 @@ class PageOne(tk.Frame):
             if blocked=="True":
                 if self.is_valid_url(url):            
                     if perm==True:
-                        Server.add_limit(url,-1,25)
+                        Server.limitation("add url",url,-1,25)
                     else:
-                        Server.add_limit(url,start,end)
+                        Server.limitation("add url",url,start,end)
                 else:
                     pass #TODO ask the stuipid client to write again the url for loop       
         
@@ -246,16 +246,16 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
-            if blocked=="True" and self.data.loc[self.data.index==id].blocked=="False" :
+            if (blocked=="True") and (self.data.loc[self.data.index==id].blocked=="False") :
                 if self.is_valid_url(url):            
                     if perm==True:
-                        Server.add_limit(url,-1,25)
+                        Server.limitation("add url",url,-1,25)
                     else:
-                        Server.add_limit(url,start,end)
+                        Server.limitation("add url",url,start,end)
                 else:
                     pass #TODO ask the stuipid client to write again the url for loop       
             elif blocked=="False" and self.data.loc[self.data.index==id].blocked=="True" :
-                Server.remove_limit(url) 
+                Server.limitation("remove url",url,start,end) 
             
             #TODO: write update func            
             self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
