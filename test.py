@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
-import socket
+import socket,sys,os,re
 import browserhistory as bh
-import  sys
-import os
+from  urllib import  request
+import urllib3
+from Server import Server as s
 def host_name():
     print(socket.gethostname())
 
@@ -27,15 +28,21 @@ def ip():
 def folder_test():
     print(os.listdir("D:\Python_Code_11\Access_Manager\database"))
 
-def path():
-    starting_path=os.path.abspath(os.getcwd())
-    print(starting_path)
-    
+def valid():
+    resp=None
+    try:
+        resp=request.urlopen("https://www.google.co.il/?hl=iw")
+    except Exception:
+        print("no")
+    else:
+        print("yes")
+
 def main(): 
-    history()
+    #history()
     #ip()
     #folder_test()
-
+    valid()
+    s.p()
     
 if __name__ == '__main__':
     main()

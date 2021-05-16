@@ -1,4 +1,5 @@
 import socket,select,os
+import validators
 import browserhistory as bh
 import pandas as pd
 #from ServerUI import *
@@ -25,13 +26,13 @@ class Server():#TODO :order to client,always on - turns on restart
          
     def get_requests(self):
           while True:
-            rlist, wlist, xlist = select.select([self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
+            self.rlist, self.wlist, self.xlist = select.select([self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
 
-            self.receive(rlist)
-            self.respond(wlist)
+            self.receive()
+            self.respond()
     
-    def receive(self,rlist):
-        for self.current_socket in rlist:
+    def receive(self):
+        for self.current_socket in self.rlist:
             if self.current_socket is self.server_socket:
                 connection = self.create_connection()
                 self.messages_to_send.append((connection,""))
@@ -43,10 +44,10 @@ class Server():#TODO :order to client,always on - turns on restart
                 else:
                     self.messages_to_send.append((self.current_socket, data))
                     
-    def respond(self,wlist):
+    def respond(self):
         for message in self.messages_to_send :
             self.current_socket, data = message
-            if self.current_socket in wlist:
+            if self.current_socket in self.wlist:
                 request = data.split("%")
                 if request[0]=="name":# add name to table
                     self.create_database(request)
@@ -81,11 +82,13 @@ class Server():#TODO :order to client,always on - turns on restart
         f.close()
         print("succesfuly upload history")
        
-    def limitation(self,start,end):
-        global wlist
-        if self.current_socket in wlist:# wiil handle it tommorow
-            self.current_socket.send(f"limitation%{start}{end}")
-         
+    def add_limit(self,url,start,end):
+        if self.current_socket in self.wlist:# wiil handle it tommorow
+            self.current_socket.send(f"limitation%{url}%{start}%{end}")
+    
+    def remove_limit(self,url):
+        if self.current_socket in self.wlist:
+            self.current_socket.send(f"remove url%{url}")
     
     def print_message(self, message, client_address):# to be deleted
         print(f"[{client_address}] {message}")
@@ -97,7 +100,7 @@ class Server():#TODO :order to client,always on - turns on restart
 
     def close(self):
         self.server_socket.close()
-
+    
 def main():
     server=Server()
     server.get_requests()

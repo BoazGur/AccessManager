@@ -7,6 +7,7 @@ import pandas as pd
 from functools import partial
 import os
 from Server import *
+from  urllib import  request
 
 LARGE_FONT = ("Verdana", 20)
 
@@ -204,7 +205,7 @@ class PageOne(tk.Frame):
         site_id = self.id_val.get()
         if messagebox.askyesno("Confirm Delete?", "Are you sure you want to delete this site?"):
             self.data = self.data[self.data.index != int(site_id)]
-            self.data.to_csv(f"database/names/{self.name}.csv", index=False)
+            self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
             self.clear()
         else:
             return True
@@ -218,9 +219,20 @@ class PageOne(tk.Frame):
         start = self.start_val.get()
         end = self.end_val.get()
         
+        if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
+            if blocked=="True":
+                if self.is_valid_url(url):            
+                    if perm==True:
+                        Server.add_limit(url,-1,25)
+                    else:
+                        Server.add_limit(url,start,end)
+                else:
+                    pass #TODO ask the stuipid client to write again the url for loop       
+        
+        
+        
         self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
-        self.data.to_csv(f"database/names/{self.name}.csv", index=False)
-        self.data.to_csv(os.path.join("database","names.csv",f"{self.name}.csv"), index=False)
+        self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
         self.clear()
 
     def update_site(self):
@@ -235,16 +247,18 @@ class PageOne(tk.Frame):
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
             if blocked=="True" and self.data.loc[self.data.index==id].blocked=="False" :
-                if perm==True:
-                    Server.limitation(-1,25)
+                if self.is_valid_url(url):            
+                    if perm==True:
+                        Server.add_limit(url,-1,25)
+                    else:
+                        Server.add_limit(url,start,end)
                 else:
-                    Server.limitation(start,end)
-            elif FALSE :
-                pass #TODO oposite 
+                    pass #TODO ask the stuipid client to write again the url for loop       
+            elif blocked=="False" and self.data.loc[self.data.index==id].blocked=="True" :
+                Server.remove_limit(url) 
             
-            #TODO: write update func
-            
-            self.data.to_csv(os.path.join("database","names.csv",f"{self.name}.csv"), index=False)
+            #TODO: write update func            
+            self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
             self.clear()
         else:
             return True
@@ -273,7 +287,16 @@ class PageOne(tk.Frame):
         self.trv.delete(*self.trv.get_children())
         for i in rows:
             self.trv.insert('', 'end', value=i)
-
+    
+    def is_valid_url(self,url):
+        resp=None
+        try:
+            resp=request.urlopen(url)
+        except Exception:
+            return False
+        else:
+            return True
+    
 app = ServerUI()
 app.title("Access Manager")
 app.geometry("1700x800")

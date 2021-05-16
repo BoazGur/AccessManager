@@ -34,7 +34,9 @@ class Client():#TODO: complete self.run, always on - turns on restart, all print
             l = f.read(1024)
         f.close()
         print("Sending Complete")
-            
+    def limitation():
+        pass
+   
     def block_websites(self, start_hour , end_hour):
         while True:
             if dt(dt.now().year, dt.now().month, dt.now().day, start_hour) < dt.now() < dt(dt.now().year, dt.now().month, dt.now().day, end_hour): # fuck off go to work
