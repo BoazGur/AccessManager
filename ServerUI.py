@@ -7,17 +7,18 @@ import pandas as pd
 from functools import partial
 import os
 from Server import *
-from  urllib import  request
+from urllib import request
 
 LARGE_FONT = ("Verdana", 20)
 
-names = pd.read_csv(os.path.join("database","names.csv"))
+names = pd.read_csv(os.path.join("database", "names.csv"))
 
 
 data = {}
-for file in os.listdir(os.path.join("database","customer")):
+for file in os.listdir(os.path.join("database", "customer")):
     filename = file.split(".")[0]
-    data[filename] = pd.read_csv(os.path.join("database","customer",f"{file}"))
+    data[filename] = pd.read_csv(
+        os.path.join("database", "customer", f"{file}"))
     data[filename].index += 1
 
 lst_names = [""] + names["name"].tolist()
@@ -74,7 +75,7 @@ class StartPage(tk.Frame):
             if i % 5 == 0:
                 j += 1
             btn_list.append(tk.Button(frame2, text=name, font=LARGE_FONT,
-                                    command=partial(controller.show_frame, i+1)))
+                                      command=partial(controller.show_frame, i+1)))
             btn_list[i].grid(row=j, column=i % 5, padx=10, pady=10)
         '''        btn_name1 = tk.Button(frame2, text="name1", font=LARGE_FONT,
                             command=lambda: controller.show_frame(PageOne))
@@ -99,7 +100,7 @@ class PageOne(tk.Frame):
         self.start_val = StringVar()
         self.end_val = StringVar()
 
-        #-----------------------Welcome to name frame
+        # -----------------------Welcome to name frame
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
 
@@ -109,12 +110,13 @@ class PageOne(tk.Frame):
 
         label = tk.Label(frame1, text=f"HELLO {name}", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
-    
+
         #-----------------------Table and More
         frame2 = tk.Frame(self, bg="#000009")
         frame2.pack(fill="both", expand=True)
 
-        wrapper1 = tk.LabelFrame(frame2, text="Browse History And Blocked Sites")
+        wrapper1 = tk.LabelFrame(
+            frame2, text="Browse History And Blocked Sites")
         wrapper2 = tk.LabelFrame(frame2, text="Search")
         wrapper3 = tk.LabelFrame(frame2, text="Blocked Site Data")
 
@@ -122,8 +124,9 @@ class PageOne(tk.Frame):
         wrapper2.pack(fill="both", expand=True, padx=20, pady=10)
         wrapper3.pack(fill="both", expand=True, padx=20, pady=10)
 
-        #-----Table
-        self.trv = ttk.Treeview(wrapper1, columns=(1, 2, 3, 4, 5, 6, 7, 8), show="headings", height=6)
+        # -----Table
+        self.trv = ttk.Treeview(wrapper1, columns=(
+            1, 2, 3, 4, 5, 6, 7, 8), show="headings", height=6)
         self.trv.pack()
 
         self.trv.heading(1, text="ID")
@@ -139,7 +142,7 @@ class PageOne(tk.Frame):
 
         self.clear()
 
-        #-----Search
+        # -----Search
         lbl_search = tk.Label(wrapper2, text="Search")
         lbl_search.pack(side="left", padx=10)
 
@@ -152,61 +155,78 @@ class PageOne(tk.Frame):
         btn_clear = tk.Button(wrapper2, text="Clear", command=self.clear)
         btn_clear.pack(side="left", padx=6)
 
-        #-----Blocked Site Data
+        # -----Blocked Site Data
         lbl_id = tk.Label(wrapper3, text="ID")
         lbl_id.grid(row=0, column=0, padx=5, pady=3)
-        ent_id = tk.Entry(wrapper3, textvariable=self.id_val)
-        ent_id.grid(row=0, column=1, padx=5, pady=3)
+        self.ent_id = tk.Entry(wrapper3, textvariable=self.id_val)
+        self.ent_id.grid(row=0, column=1, padx=5, pady=3)
 
         lbl_url = tk.Label(wrapper3, text="URL")
         lbl_url.grid(row=1, column=0, padx=5, pady=3)
-        ent_url = tk.Entry(wrapper3, textvariable=self.url_val)
-        ent_url.grid(row=1, column=1, padx=5, pady=3)
-        
+        self.ent_url = tk.Entry(wrapper3, textvariable=self.url_val)
+        self.ent_url.grid(row=1, column=1, padx=5, pady=3)
+
         lbl_name = tk.Label(wrapper3, text="Name")
         lbl_name.grid(row=2, column=0, padx=5, pady=3)
-        ent_name = tk.Entry(wrapper3, textvariable=self.name_val)
-        ent_name.grid(row=2, column=1, padx=5, pady=3)
+        self.ent_name = tk.Entry(wrapper3, textvariable=self.name_val)
+        self.ent_name.grid(row=2, column=1, padx=5, pady=3)
 
         lbl_date = tk.Label(wrapper3, text="Date")
         lbl_date.grid(row=3, column=0, padx=5, pady=3)
-        ent_date = tk.Entry(wrapper3, textvariable=self.date_val)
-        ent_date.grid(row=3, column=1, padx=5, pady=3)
+        self.ent_date = tk.Entry(wrapper3, textvariable=self.date_val)
+        self.ent_date.grid(row=3, column=1, padx=5, pady=3)
 
         lbl_blocked = tk.Label(wrapper3, text="Blocked")
         lbl_blocked.grid(row=4, column=0, padx=5, pady=3)
-        ent_blocked = tk.Entry(wrapper3, textvariable=self.blocked_val)
-        ent_blocked.grid(row=4, column=1, padx=5, pady=3)
+        self.ent_blocked = tk.Entry(wrapper3, textvariable=self.blocked_val)
+        self.ent_blocked.grid(row=4, column=1, padx=5, pady=3)
 
         lbl_perm = tk.Label(wrapper3, text="Permanent")
         lbl_perm.grid(row=5, column=0, padx=5, pady=3)
-        ent_perm = tk.Entry(wrapper3, textvariable=self.perm_val)
-        ent_perm.grid(row=5, column=1, padx=5, pady=3)
+        self.ent_perm = tk.Entry(wrapper3, textvariable=self.perm_val)
+        self.ent_perm.grid(row=5, column=1, padx=5, pady=3)
 
         lbl_start = tk.Label(wrapper3, text="Start")
         lbl_start.grid(row=6, column=0, padx=5, pady=3)
-        ent_start = tk.Entry(wrapper3, textvariable=self.start_val)
-        ent_start.grid(row=6, column=1, padx=5, pady=3)
+        self.ent_start = tk.Entry(wrapper3, textvariable=self.start_val)
+        self.ent_start.grid(row=6, column=1, padx=5, pady=3)
 
         lbl_end = tk.Label(wrapper3, text="End")
         lbl_end.grid(row=7, column=0, padx=5, pady=3)
-        ent_end = tk.Entry(wrapper3, textvariable=self.end_val)
-        ent_end.grid(row=7, column=1, padx=5, pady=3)
+        self.ent_end = tk.Entry(wrapper3, textvariable=self.end_val)
+        self.ent_end.grid(row=7, column=1, padx=5, pady=3)
 
-        btn_update = tk.Button(wrapper3, text="Update", command=self.update_site)
+        btn_update = tk.Button(wrapper3, text="Update",
+                               command=self.update_site)
         btn_add = tk.Button(wrapper3, text="Add New", command=self.add_site)
-        btn_delete = tk.Button(wrapper3, text="Delete", command=self.delete_site)
+        btn_delete = tk.Button(wrapper3, text="Delete",
+                               command=self.delete_site)
+        btn_clear_entries = tk.Button(wrapper3, text="Clear Entries",
+                               command=self.clear_entries)
 
         btn_add.grid(row=8, column=0, padx=5, pady=3)
         btn_update.grid(row=8, column=1, padx=5, pady=3)
         btn_delete.grid(row=8, column=2, padx=5, pady=3)
+        btn_clear_entries.grid(columnspan=3, sticky="ew", padx=5, pady=3)
+
+    def clear_entries(self):
+        self.ent_id.delete(0, END)
+        self.ent_url.delete(0, END)
+        self.ent_name.delete(0, END)
+        self.ent_date.delete(0, END)
+        self.ent_blocked.delete(0, END)
+        self.ent_perm.delete(0, END)
+        self.ent_start.delete(0, END)
+        self.ent_end.delete(0, END)
 
     def delete_site(self):
         site_id = self.id_val.get()
         if messagebox.askyesno("Confirm Delete?", "Are you sure you want to delete this site?"):
             self.data = self.data[self.data.index != int(site_id)]
-            self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
+            self.data.to_csv(os.path.join(
+                "database", "customer", f"{self.name}.csv"), index=False)
             self.clear()
+            self.clear_entries()
         else:
             return True
 
@@ -218,25 +238,27 @@ class PageOne(tk.Frame):
         perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
-        
+
         if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
-            if blocked=="True":
-                if self.is_valid_url(url):            
-                    if perm==True:
-                        Server.add_limit(url,-1,25)
+            if blocked == "True":
+                while True:
+                    if self.is_valid_url(url):
+                        if perm == True:
+                            Server.add_limit(url, -1, 25)
+                        else:
+                            Server.add_limit(url, start, end)
+                        break
                     else:
-                        Server.add_limit(url,start,end)
-                else:
-                    pass #TODO ask the stuipid client to write again the url for loop       
-        
-        
-        
-        self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
-        self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
+                        messagebox.showerror("Not Valid URL", "The URL you entered is invalid please try again!")
+
+        self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
+                                      "perm": perm, "start": start, "end": end}, ignore_index=True)
+        self.data.to_csv(os.path.join("database", "customer",
+                                      f"{self.name}.csv"), index=False)
         self.clear()
+        self.clear_entries()
 
     def update_site(self):
-        id = self.id_val.get()
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
@@ -246,20 +268,24 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
-            if blocked=="True" and self.data.loc[self.data.index==id].blocked=="False" :
-                if self.is_valid_url(url):            
-                    if perm==True:
-                        Server.add_limit(url,-1,25)
-                    else:
-                        Server.add_limit(url,start,end)
+            if (blocked == "True") and (self.data[(self.data.index == id) & (blocked == "False")].empty):
+                if self.is_valid_url(url):
+                    print("updated")
+                    # if perm == True:
+                    #     Server.add_limit(url, -1, 25)
+                    # else:
+                    #     Server.add_limit(url, start, end)
                 else:
-                    pass #TODO ask the stuipid client to write again the url for loop       
-            elif blocked=="False" and self.data.loc[self.data.index==id].blocked=="True" :
-                Server.remove_limit(url) 
+                    messagebox.showerror("Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://")
+                    return
+            elif (blocked == "False") and (self.data[(self.data.index == id) & (blocked == "True")].empty):
+                Server.remove_limit(url)
+
             
-            #TODO: write update func            
-            self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
+            self.data.to_csv(os.path.join(
+                "database", "customer", f"{self.name}.csv"), index=False)
             self.clear()
+            self.clear_entries()
         else:
             return True
 
@@ -280,23 +306,23 @@ class PageOne(tk.Frame):
 
     def search(self):
         search_val2 = self.search_val.get()
-        possible = self.data[self.data["name"].str.contains(search_val2)] 
+        possible = self.data[self.data["name"].str.contains(search_val2)]
         self.update(possible.itertuples())
 
     def update(self, rows):
         self.trv.delete(*self.trv.get_children())
         for i in rows:
             self.trv.insert('', 'end', value=i)
-    
-    def is_valid_url(self,url):
-        resp=None
+
+    def is_valid_url(self, url):
         try:
-            resp=request.urlopen(url)
+            request.urlopen(url)
         except Exception:
             return False
-        else:
-            return True
-    
+
+        return True
+
+
 app = ServerUI()
 app.title("Access Manager")
 app.geometry("1700x800")

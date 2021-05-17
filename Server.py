@@ -1,5 +1,4 @@
 import socket,select,os
-import validators
 import browserhistory as bh
 import pandas as pd
 #from ServerUI import *
