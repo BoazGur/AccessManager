@@ -36,13 +36,21 @@ def valid():
         print("no")
     else:
         print("yes")
+def lst():
+    lst=[]
+    a=["banana","x",8]
+    b=["car",10,11]
+    lst.append(a)
+    lst.append(b)
+    print(lst)
+    print(lst[1])
 
-def main(): 
+def main():  
     #history()
     #ip()
     #folder_test()
-    valid()
-    s.p()
+    #valid()
+    lst()
     
 if __name__ == '__main__':
     main()

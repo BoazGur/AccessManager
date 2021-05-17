@@ -8,7 +8,7 @@ MAX_MESSAGE_LENGTH = 1024
 #names = pd.read_csv("database\\names.csv")
 names = pd.read_csv(os.path.join("database","names.csv"))
 
-class Server():#TODO :order to client,always on - turns on restart
+class Server():#TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         self.server_socket = socket.socket()
         hostname = socket.gethostname()
@@ -81,13 +81,11 @@ class Server():#TODO :order to client,always on - turns on restart
         f.close()
         print("succesfuly upload history")
        
-    def add_limit(self,url,start,end):
-        if self.current_socket in self.wlist:# wiil handle it tommorow
-            self.current_socket.send(f"limitation%{url}%{start}%{end}")
-    
-    def remove_limit(self,url):
+    def limitation(self,msg,url,start,end):
         if self.current_socket in self.wlist:
-            self.current_socket.send(f"remove url%{url}")
+            self.current_socket.send(f"{msg}%{url}%{start}%{end}".encode())
+    
+    
     
     def print_message(self, message, client_address):# to be deleted
         print(f"[{client_address}] {message}")

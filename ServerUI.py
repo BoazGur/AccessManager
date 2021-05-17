@@ -240,6 +240,7 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
+<<<<<<< HEAD
             if blocked == "True":
                 while True:
                     if self.is_valid_url(url):
@@ -255,6 +256,21 @@ class PageOne(tk.Frame):
                                       "perm": perm, "start": start, "end": end}, ignore_index=True)
         self.data.to_csv(os.path.join("database", "customer",
                                       f"{self.name}.csv"), index=False)
+=======
+            if blocked=="True":
+                if self.is_valid_url(url):            
+                    if perm==True:
+                        Server.limitation("add url",url,-1,25)
+                    else:
+                        Server.limitation("add url",url,start,end)
+                else:
+                    pass #TODO ask the stuipid client to write again the url for loop       
+        
+        
+        
+        self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
+        self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
+>>>>>>> 02558940b7af7d3889be23f8180dd7bb56816fec
         self.clear()
         self.clear_entries()
 
@@ -268,6 +284,7 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
+<<<<<<< HEAD
             if (blocked == "True") and (self.data[(self.data.index == id) & (blocked == "False")].empty):
                 if self.is_valid_url(url):
                     print("updated")
@@ -281,6 +298,18 @@ class PageOne(tk.Frame):
             elif (blocked == "False") and (self.data[(self.data.index == id) & (blocked == "True")].empty):
                 Server.remove_limit(url)
 
+=======
+            if (blocked=="True") and (self.data.loc[self.data.index==id].blocked=="False") :
+                if self.is_valid_url(url):            
+                    if perm==True:
+                        Server.limitation("add url",url,-1,25)
+                    else:
+                        Server.limitation("add url",url,start,end)
+                else:
+                    pass #TODO ask the stuipid client to write again the url for loop       
+            elif blocked=="False" and self.data.loc[self.data.index==id].blocked=="True" :
+                Server.limitation("remove url",url,start,end) 
+>>>>>>> 02558940b7af7d3889be23f8180dd7bb56816fec
             
             self.data.to_csv(os.path.join(
                 "database", "customer", f"{self.name}.csv"), index=False)
