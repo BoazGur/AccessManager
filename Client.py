@@ -2,18 +2,21 @@ import socket,os,time
 import browserhistory as bh
 from datetime import datetime as dt
 
+
+
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
 
+
 class Client():#TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip="192.168.1.26"):# ip wiil change
         self.s = socket.socket()
         self.s.connect((ip,port))
-        self.sites_to_block=[]    #[[url1,start,end],[url2.start,end]]
-        print("connected")    
-             
+        self.sites_to_block=[["https://www.one.co.il",0,23]]    #[[url1,start,end],[url2.start,end]]
+        print("connected")         
+
     def run(self):
         self.first_message()
         while True:
@@ -73,8 +76,8 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
             time.sleep(3)
 
 def main():
-   client = Client()
-   client.run() 
-
-if __name__ == "__main__":
+    client = Client()
+    client.run()
+ 
+if __name__ == '__main__':
     main()

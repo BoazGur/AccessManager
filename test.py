@@ -45,6 +45,12 @@ def lst():
     print(lst)
     print(lst[1])
 
+
+
+
+
+
+
 def main():  
     #history()
     #ip()

