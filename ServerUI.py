@@ -271,7 +271,7 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
-            if (blocked == True) and (self.data.loc[self.data.index == id, "blocked"] == False)[0]:
+            if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False)[0]:
                 if self.is_valid_url(url):
                     if perm == True:
                         Server.limitation("add url", url, -1, 25)
@@ -280,10 +280,10 @@ class PageOne(tk.Frame):
                 else:
                     messagebox.showerror(
                         "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
-            elif (blocked == False) and (self.data.loc[self.data.index == id, "blocked"] == True)[0]:
+            elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True)[0]:
                 Server.limitation("remove url", url, start, end)
 
-            self.data.loc[self.data.index == 1, ["url", "name", "date", "blocked",
+            self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
                                                   "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
             self.data.to_csv(os.path.join(
                 "database", "customer", f"{self.name}.csv"), index=False)
