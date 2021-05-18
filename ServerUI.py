@@ -235,23 +235,21 @@ class PageOne(tk.Frame):
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
-        blocked = self.date_val.get()
+        blocked = self.blocked_val.get()
         perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
             if blocked == "True":
-                while True:
-                    if self.is_valid_url(url):
-                        if perm == True:
-                            Server.add_limit(url, -1, 25)
-                        else:
-                            Server.add_limit(url, start, end)
-                        break
+                if self.is_valid_url(url):
+                    if perm == True:
+                        Server.add_limit(url, -1, 25)
                     else:
-                        messagebox.showerror(
-                            "Not Valid URL", "The URL you entered is invalid please try again!")
+                        Server.add_limit(url, start, end)
+                else:
+                    messagebox.showerror(
+                        "Not Valid URL", "The URL you entered is invalid please try again!")
 
         self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
                                       "perm": perm, "start": start, "end": end}, ignore_index=True)
