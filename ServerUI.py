@@ -20,7 +20,7 @@ for file in os.listdir(os.path.join("database", "customer")):
     filename = file.split(".")[0]
     data[filename] = pd.read_csv(
         os.path.join("database", "customer", f"{file}"))
-    data[filename].index += 1
+    #data[filename].index += 1
 
 lst_names = [""] + names["name"].tolist()
 
@@ -244,19 +244,21 @@ class PageOne(tk.Frame):
             if blocked == "True":
                 if self.is_valid_url(url):
                     if perm == True:
-                        Server.add_limit(url, -1, 25)
+                        Server.limitation("add url", url, -1, 25)
                     else:
-                        Server.add_limit(url, start, end)
+                        Server.limitation("add url", url, start, end)
                 else:
                     messagebox.showerror(
                         "Not Valid URL", "The URL you entered is invalid please try again!")
 
-        self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
-                                      "perm": perm, "start": start, "end": end}, ignore_index=True)
-        self.data.to_csv(os.path.join("database", "customer",
-                                      f"{self.name}.csv"), index=False)
-        self.update_table()
-        self.clear_entries()
+            self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
+                                        "perm": perm, "start": start, "end": end}, ignore_index=True)
+            self.data.to_csv(os.path.join("database", "customer",
+                                        f"{self.name}.csv"), index=False)
+            self.update_table()
+            self.clear_entries()
+        else:
+            return True
 
     def update_site(self):
         id = self.id_val.get()
