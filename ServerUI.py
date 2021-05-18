@@ -96,8 +96,8 @@ class PageOne(tk.Frame):
         self.url_val = StringVar()
         self.name_val = StringVar()
         self.date_val = StringVar()
-        self.blocked_val = StringVar()
-        self.perm_val = StringVar()
+        self.blocked_val = IntVar()
+        self.perm_val = IntVar()
         self.start_val = StringVar()
         self.end_val = StringVar()
 
@@ -153,7 +153,8 @@ class PageOne(tk.Frame):
         btn_search = tk.Button(wrapper2, text="Search", command=self.search)
         btn_search.pack(side="left", padx=6)
 
-        btn_clear = tk.Button(wrapper2, text="Clear", command=self.update_table)
+        btn_clear = tk.Button(wrapper2, text="Clear",
+                              command=self.update_table)
         btn_clear.pack(side="left", padx=6)
 
         # -----Blocked Site Data
@@ -174,27 +175,32 @@ class PageOne(tk.Frame):
 
         lbl_date = tk.Label(wrapper3, text="Date")
         lbl_date.grid(row=3, column=0, padx=5, pady=3)
-        self.ent_date = tkcalendar.DateEntry(wrapper3, textvariable=self.date_val)
+        self.ent_date = tkcalendar.DateEntry(
+            wrapper3, textvariable=self.date_val)
         self.ent_date.grid(row=3, column=1, padx=5, pady=3)
 
         lbl_blocked = tk.Label(wrapper3, text="Blocked")
         lbl_blocked.grid(row=4, column=0, padx=5, pady=3)
-        self.ent_blocked = tk.Entry(wrapper3, textvariable=self.blocked_val)
-        self.ent_blocked.grid(row=4, column=1, padx=5, pady=3)
+        self.check_box_blocked = tk.Checkbutton(
+            wrapper3, variable=self.blocked_val, onvalue=1, offvalue=0, command=self.hide_perm)
+        self.check_box_blocked.grid(row=4, column=1, padx=5, pady=3)
 
         lbl_perm = tk.Label(wrapper3, text="Permanent")
         lbl_perm.grid(row=5, column=0, padx=5, pady=3)
-        self.ent_perm = tk.Entry(wrapper3, textvariable=self.perm_val)
-        self.ent_perm.grid(row=5, column=1, padx=5, pady=3)
+        self.check_box_perm = tk.Checkbutton(
+            wrapper3, variable=self.perm_val, onvalue=1, offvalue=0, state="disabled", command=self.hide_time)
+        self.check_box_perm.grid(row=5, column=1, padx=5, pady=3)
 
         lbl_start = tk.Label(wrapper3, text="Start")
         lbl_start.grid(row=6, column=0, padx=5, pady=3)
-        self.ent_start = tk.Entry(wrapper3, textvariable=self.start_val)
+        self.ent_start = tk.Entry(
+            wrapper3, textvariable=self.start_val, state="disabled")
         self.ent_start.grid(row=6, column=1, padx=5, pady=3)
 
         lbl_end = tk.Label(wrapper3, text="End")
         lbl_end.grid(row=7, column=0, padx=5, pady=3)
-        self.ent_end = tk.Entry(wrapper3, textvariable=self.end_val)
+        self.ent_end = tk.Entry(
+            wrapper3, textvariable=self.end_val, state="disabled")
         self.ent_end.grid(row=7, column=1, padx=5, pady=3)
 
         btn_update = tk.Button(wrapper3, text="Update",
@@ -210,13 +216,32 @@ class PageOne(tk.Frame):
         btn_delete.grid(row=8, column=2, padx=5, pady=3)
         btn_clear_entries.grid(columnspan=3, sticky="ew", padx=5, pady=3)
 
+    def hide_time(self):
+        if self.perm_val.get() == 0:
+            self.ent_start.configure(state="disabled")
+            self.ent_end.configure(state="disabled")
+        else:
+            self.ent_start.configure(state="normal")
+            self.ent_end.configure(state="normal")
+
+    def hide_perm(self):
+        if self.blocked_val.get() == 0:
+            self.check_box_perm.configure(state="disabled")
+            self.ent_start.configure(state="disabled")
+            self.ent_end.configure(state="disabled")
+        
+        else:
+            self.check_box_perm.configure(state="normal")
+            self.ent_start.configure(state="normal")
+            self.ent_end.configure(state="normal")
+
     def clear_entries(self):
         self.ent_id.delete(0, END)
         self.ent_url.delete(0, END)
         self.ent_name.delete(0, END)
         self.ent_date.delete(0, END)
-        self.ent_blocked.delete(0, END)
-        self.ent_perm.delete(0, END)
+        self.check_box_blocked.delete(0, END)
+        self.check_box_perm.delete(0, END)
         self.ent_start.delete(0, END)
         self.ent_end.delete(0, END)
 
@@ -231,7 +256,7 @@ class PageOne(tk.Frame):
                 "database", "customer", f"{self.name}.csv"), index=False)
             self.update_table()
             self.clear_entries()
-            Server.limitation("remove url",url,start, end)
+            Server.limitation("remove url", url, start, end)
         else:
             return True
 
@@ -256,9 +281,9 @@ class PageOne(tk.Frame):
                         "Not Valid URL", "The URL you entered is invalid please try again!")
 
             self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
-                                        "perm": perm, "start": start, "end": end}, ignore_index=True)
+                                          "perm": perm, "start": start, "end": end}, ignore_index=True)
             self.data.to_csv(os.path.join("database", "customer",
-                                        f"{self.name}.csv"), index=False)
+                                          f"{self.name}.csv"), index=False)
             self.update_table()
             self.clear_entries()
         else:
@@ -269,7 +294,7 @@ class PageOne(tk.Frame):
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
-        blocked = self.blocked_val.get()
+        blocked = bool(self.blocked_val.get())
         perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
@@ -288,7 +313,7 @@ class PageOne(tk.Frame):
                 Server.limitation("remove url", url, start, end)
 
             self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
-                                                  "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
+                                                       "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
             self.data.to_csv(os.path.join(
                 "database", "customer", f"{self.name}.csv"), index=False)
             self.update_table()
