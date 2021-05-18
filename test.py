@@ -6,6 +6,10 @@ import browserhistory as bh
 from  urllib import  request
 import urllib3
 from Server import Server as s
+import pandas as pd
+
+df = pd.read_csv("database/customer/DESKTOP-OTB45S1.csv")
+
 def host_name():
     print(socket.gethostname())
 
@@ -50,7 +54,9 @@ def main():
     #ip()
     #folder_test()
     #valid()
-    lst()
+    #lst()
+    df.loc[df.index == 0, ["url", "blocked"]] = ["hello", True]
+    print(df)
     
 if __name__ == '__main__':
     main()

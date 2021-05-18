@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import ttk
 from tkinter import messagebox
+import tkcalendar
 import pandas as pd
 from functools import partial
 import os
@@ -108,7 +109,7 @@ class PageOne(tk.Frame):
                             command=lambda: controller.show_frame(0))
         button1.pack()
 
-        label = tk.Label(frame1, text=f"HELLO {name}", font=LARGE_FONT)
+        label = tk.Label(frame1, text=f"{name}", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
         #-----------------------Table and More
@@ -140,7 +141,7 @@ class PageOne(tk.Frame):
 
         self.trv.bind("<Double 1>", self.get_row)
 
-        self.clear()
+        self.update_table()
 
         # -----Search
         lbl_search = tk.Label(wrapper2, text="Search")
@@ -152,7 +153,7 @@ class PageOne(tk.Frame):
         btn_search = tk.Button(wrapper2, text="Search", command=self.search)
         btn_search.pack(side="left", padx=6)
 
-        btn_clear = tk.Button(wrapper2, text="Clear", command=self.clear)
+        btn_clear = tk.Button(wrapper2, text="Clear", command=self.update_table)
         btn_clear.pack(side="left", padx=6)
 
         # -----Blocked Site Data
@@ -173,7 +174,7 @@ class PageOne(tk.Frame):
 
         lbl_date = tk.Label(wrapper3, text="Date")
         lbl_date.grid(row=3, column=0, padx=5, pady=3)
-        self.ent_date = tk.Entry(wrapper3, textvariable=self.date_val)
+        self.ent_date = tkcalendar.DateEntry(wrapper3, textvariable=self.date_val)
         self.ent_date.grid(row=3, column=1, padx=5, pady=3)
 
         lbl_blocked = tk.Label(wrapper3, text="Blocked")
@@ -202,7 +203,7 @@ class PageOne(tk.Frame):
         btn_delete = tk.Button(wrapper3, text="Delete",
                                command=self.delete_site)
         btn_clear_entries = tk.Button(wrapper3, text="Clear Entries",
-                               command=self.clear_entries)
+                                      command=self.clear_entries)
 
         btn_add.grid(row=8, column=0, padx=5, pady=3)
         btn_update.grid(row=8, column=1, padx=5, pady=3)
@@ -225,7 +226,7 @@ class PageOne(tk.Frame):
             self.data = self.data[self.data.index != int(site_id)]
             self.data.to_csv(os.path.join(
                 "database", "customer", f"{self.name}.csv"), index=False)
-            self.clear()
+            self.update_table()
             self.clear_entries()
         else:
             return True
@@ -240,7 +241,6 @@ class PageOne(tk.Frame):
         end = self.end_val.get()
 
         if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
-<<<<<<< HEAD
             if blocked == "True":
                 while True:
                     if self.is_valid_url(url):
@@ -250,31 +250,18 @@ class PageOne(tk.Frame):
                             Server.add_limit(url, start, end)
                         break
                     else:
-                        messagebox.showerror("Not Valid URL", "The URL you entered is invalid please try again!")
+                        messagebox.showerror(
+                            "Not Valid URL", "The URL you entered is invalid please try again!")
 
         self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
                                       "perm": perm, "start": start, "end": end}, ignore_index=True)
         self.data.to_csv(os.path.join("database", "customer",
                                       f"{self.name}.csv"), index=False)
-=======
-            if blocked=="True":
-                if self.is_valid_url(url):            
-                    if perm==True:
-                        Server.limitation("add url",url,-1,25)
-                    else:
-                        Server.limitation("add url",url,start,end)
-                else:
-                    pass #TODO ask the stuipid client to write again the url for loop       
-        
-        
-        
-        self.data = self.data.append({"url":url, "name":name, "date":date, "blocked":blocked, "perm":perm, "start":start, "end":end}, ignore_index=True)
-        self.data.to_csv(os.path.join("database","customer",f"{self.name}.csv"), index=False)
->>>>>>> 02558940b7af7d3889be23f8180dd7bb56816fec
-        self.clear()
+        self.update_table()
         self.clear_entries()
 
     def update_site(self):
+        id = self.id_val.get()
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
@@ -283,37 +270,24 @@ class PageOne(tk.Frame):
         start = self.start_val.get()
         end = self.end_val.get()
 
-        if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?"):
-<<<<<<< HEAD
-            if (blocked == "True") and (self.data[(self.data.index == id) & (blocked == "False")].empty):
+        if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
+            if (blocked == True) and (self.data.loc[self.data.index == id, "blocked"] == False)[0]:
                 if self.is_valid_url(url):
-                    print("updated")
-                    # if perm == True:
-                    #     Server.add_limit(url, -1, 25)
-                    # else:
-                    #     Server.add_limit(url, start, end)
-                else:
-                    messagebox.showerror("Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://")
-                    return
-            elif (blocked == "False") and (self.data[(self.data.index == id) & (blocked == "True")].empty):
-                Server.remove_limit(url)
-
-=======
-            if (blocked=="True") and (self.data.loc[self.data.index==id].blocked=="False") :
-                if self.is_valid_url(url):            
-                    if perm==True:
-                        Server.limitation("add url",url,-1,25)
+                    if perm == True:
+                        Server.limitation("add url", url, -1, 25)
                     else:
-                        Server.limitation("add url",url,start,end)
+                        Server.limitation("add url", url, start, end)
                 else:
-                    pass #TODO ask the stuipid client to write again the url for loop       
-            elif blocked=="False" and self.data.loc[self.data.index==id].blocked=="True" :
-                Server.limitation("remove url",url,start,end) 
->>>>>>> 02558940b7af7d3889be23f8180dd7bb56816fec
-            
+                    messagebox.showerror(
+                        "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
+            elif (blocked == False) and (self.data.loc[self.data.index == id, "blocked"] == True)[0]:
+                Server.limitation("remove url", url, start, end)
+
+            self.data.loc[self.data.index == 1, ["url", "name", "date", "blocked",
+                                                  "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
             self.data.to_csv(os.path.join(
                 "database", "customer", f"{self.name}.csv"), index=False)
-            self.clear()
+            self.update_table()
             self.clear_entries()
         else:
             return True
@@ -330,7 +304,7 @@ class PageOne(tk.Frame):
         self.start_val.set(item["values"][6])
         self.end_val.set(item["values"][7])
 
-    def clear(self):
+    def update_table(self):
         self.update(self.data.itertuples())
 
     def search(self):
