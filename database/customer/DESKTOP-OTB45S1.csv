@@ -1,4 +1,4 @@
 url,name,date,blocked,perm,start,end
-http://www.ynet.co.il,sdcsdc,scsdc,False,sdcsdc,sdcsdc,sdcsd
-http://www.google.com,sdcsdc,scsdc,True,sdcsdc,sdcsdc,sdcsd
-http://www.one.co.il,sdcsdc,5/3/21,False,sdcsdc,sdcsdc,yes
+http://www.ynet.co.il,sdcsdc,scsdc,False,False,sdcsdc,sdcsd
+http://www.google.com,sdcsdc,scsdc,True,False,sdcsdc,sdcsd
+http://www.one.co.il,sdcsdc,5/3/21,False,True,sdcsdc,yes

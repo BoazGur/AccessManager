@@ -295,7 +295,7 @@ class PageOne(tk.Frame):
         name = self.name_val.get()
         date = self.date_val.get()
         blocked = bool(self.blocked_val.get())
-        perm = self.perm_val.get()
+        perm = bool(self.perm_val.get())
         start = self.start_val.get()
         end = self.end_val.get()
 
