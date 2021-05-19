@@ -15,13 +15,16 @@ def host_name():
 
 def history():
     #print(bh.get_browserhistory())
-    dict_obj = bh.get_browserhistory()
-    print(dict_obj.keys())
+    # dict_obj = bh.get_browserhistory()
+    # print(dict_obj.keys())
    
-    #bh.write_browserhistory_csv()
+    bh.write_browserhistory_csv()
+    history=pd.read_csv(os.path.join(f"chrome_history.csv"),engine="python",encoding='',error_bad_lines=False)
+    
+    print(history.info())
     #file=open("Browserhistory.csv")
     
-    print(bh.get_database_paths())
+    #print(bh.get_database_paths())
     #print(bh.get_username())
 
 def ip():
@@ -48,15 +51,19 @@ def lst():
     lst.append(b)
     print(lst)
     print(lst[1])
-
+def table():
+    table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+    df=pd.read_csv("history.csv")
+    full_table= pd.concat([table,df])
+    print(full_table)
+    
 def main():  
-    #history()
+    history()
     #ip()
     #folder_test()
     #valid()
-    #lst()
-    df.loc[df.index == 0, ["url", "blocked"]] = ["hello", True]
-    print(df)
+    #table()
+
     
 if __name__ == '__main__':
     main()

@@ -100,7 +100,7 @@ class PageOne(tk.Frame):
         self.perm_val = StringVar()
         self.start_val = StringVar()
         self.end_val = StringVar()
-
+     
         # -----------------------Welcome to name frame
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
@@ -231,7 +231,7 @@ class PageOne(tk.Frame):
                 "database", "customer", f"{self.name}.csv"), index=False)
             self.update_table()
             self.clear_entries()
-            Server.limitation("remove url",url,start, end)
+            Server.limitation("remove url",url,start,end)
         else:
             return True
 
@@ -328,8 +328,9 @@ class PageOne(tk.Frame):
             return False
 
         return True
-
-
+    def update_customer_name(self):# this func will be change customer_name
+       #self.customers_names[name]=updeted_names # update it to server.py
+        pass
 app = ServerUI()
 app.title("Access Manager")
 app.geometry("1700x800")

