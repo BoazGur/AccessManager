@@ -21,8 +21,9 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         self.messages_to_send = [] # [(self.current_socket, last data from client)]
         self.current_socket = None
         
-        self.action = {"history": self.history}
-         
+        self.action = {"name":self.create_database,"history": self.history}
+        self.customers_names={} # {socket.gethostname():current name}
+        
     def get_requests(self):
           while True:
             self.rlist, self.wlist, self.xlist = select.select([self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
@@ -47,11 +48,11 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         for message in self.messages_to_send :
             self.current_socket, data = message
             if self.current_socket in self.wlist:
-                request = data.split("%")
-                if request[0]=="name":# add name to table
-                    self.create_database(request)
-                elif data=="history":
-                    self.history()
+                request = data.split("%") # request[1]= name
+                if request[0] =="name":
+                    self.create_database(request[1]) 
+                elif request[0]=="history":
+                    self.history(request[1])
                 else:                   
                     self.current_socket.send("[Error]: Unknown command".encode())  # can not run self.promblem beacuse it wiil get stuck
                 self.messages_to_send.remove(message)
@@ -61,17 +62,23 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         self.print_message("has joined!", client_address)
         self.open_client_sockets.append(connection)
     
-    def create_database(self,request):  
+    def create_database(self,name):#add name to table  
         global names
-        if request[1] not in list(names["name"]):
-            names=names.append({"name":request[1]},ignore_index=True)
+        self.customers_names[name]=""
+        
+        if name not in list(names["name"]):
+            names=names.append({"name":name},ignore_index=True)
             names.to_csv(os.path.join("database","names.csv"),index=False)
         
         df=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
-        df.to_csv(os.path.join('database','customer',f"{request[1]}.csv"), index=False)
+        df.to_csv(os.path.join('database','customer',f"{name}.csv"), index=False)# PermissionError: [Errno 13] Permission denied: if file is open
             
-    def history(self):
-        path=os.path.join("history.csv")
+    def history(self,name):# must be admnstritor 
+        updated_name=name
+        if self.customers_names[name] != "":
+            updated_name=self.customers_names[name]
+        
+        path=os.path.join(f"history%{updated_name}.csv")
         with open(path, 'wb') as f:
             while True:
                 file = self.current_socket.recv(1024)
@@ -79,8 +86,15 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
                     break                 
                 f.write(file)
         f.close()
-        print("succesfuly upload history")
-       
+        history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False)#delim_whitespace=True
+           
+        full_table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+        full_table["url"]=history[history.columns[0]]
+        full_table["name"]=history[history.columns[1]]
+        full_table["date"]=history[history.columns[2]]
+        full_table=full_table[full_table.date != "1601-01-01 02:00:00"]
+        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"), index=False,)      
+
     def limitation(self,msg,url,start,end):
         if self.current_socket in self.wlist:
             self.current_socket.send(f"{msg}%{url}%{start}%{end}".encode())

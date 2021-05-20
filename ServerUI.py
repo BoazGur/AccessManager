@@ -96,8 +96,8 @@ class PageOne(tk.Frame):
         self.url_val = StringVar()
         self.name_val = StringVar()
         self.date_val = StringVar()
-        self.blocked_val = IntVar()
-        self.perm_val = IntVar()
+        self.blocked_val = BooleanVar()
+        self.perm_val = BooleanVar()
         self.start_val = StringVar()
         self.end_val = StringVar()
 
@@ -182,13 +182,13 @@ class PageOne(tk.Frame):
         lbl_blocked = tk.Label(wrapper3, text="Blocked")
         lbl_blocked.grid(row=4, column=0, padx=5, pady=3)
         self.check_box_blocked = tk.Checkbutton(
-            wrapper3, variable=self.blocked_val, onvalue=1, offvalue=0, command=self.hide_perm)
+            wrapper3, variable=self.blocked_val, onvalue=True, offvalue=False, command=self.hide_perm)
         self.check_box_blocked.grid(row=4, column=1, padx=5, pady=3)
 
         lbl_perm = tk.Label(wrapper3, text="Permanent")
         lbl_perm.grid(row=5, column=0, padx=5, pady=3)
         self.check_box_perm = tk.Checkbutton(
-            wrapper3, variable=self.perm_val, onvalue=1, offvalue=0, state="disabled", command=self.hide_time)
+            wrapper3, variable=self.perm_val, onvalue=True, offvalue=False, state="disabled", command=self.hide_time)
         self.check_box_perm.grid(row=5, column=1, padx=5, pady=3)
 
         lbl_start = tk.Label(wrapper3, text="Start")
@@ -217,31 +217,24 @@ class PageOne(tk.Frame):
         btn_clear_entries.grid(columnspan=3, sticky="ew", padx=5, pady=3)
 
     def hide_time(self):
-        if self.perm_val.get() == 0:
-            self.ent_start.configure(state="disabled")
-            self.ent_end.configure(state="disabled")
-        else:
+        if self.perm_val.get():
             self.ent_start.configure(state="normal")
             self.ent_end.configure(state="normal")
+        else:
+            self.ent_start.configure(state="disabled")
+            self.ent_end.configure(state="disabled")
 
     def hide_perm(self):
-        if self.blocked_val.get() == 0:
-            self.check_box_perm.configure(state="disabled")
-            self.ent_start.configure(state="disabled")
-            self.ent_end.configure(state="disabled")
-        
-        else:
+        if self.blocked_val.get():
             self.check_box_perm.configure(state="normal")
-            self.ent_start.configure(state="normal")
-            self.ent_end.configure(state="normal")
+        else:
+            self.check_box_perm.configure(state="disabled")
 
     def clear_entries(self):
         self.ent_id.delete(0, END)
         self.ent_url.delete(0, END)
         self.ent_name.delete(0, END)
         self.ent_date.delete(0, END)
-        self.check_box_blocked.delete(0, END)
-        self.check_box_perm.delete(0, END)
         self.ent_start.delete(0, END)
         self.ent_end.delete(0, END)
 
@@ -294,8 +287,8 @@ class PageOne(tk.Frame):
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
-        blocked = bool(self.blocked_val.get())
-        perm = bool(self.perm_val.get())
+        blocked = self.blocked_val.get()
+        perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
 
@@ -353,6 +346,14 @@ class PageOne(tk.Frame):
             return False
 
         return True
+
+    def update_customer_name(self):  # this func will be change customer_name
+       # self.customers_names[name]=updeted_names # update it to server.py
+        new_name = "None"  # TODO Need to get somewhere the new name
+        names.loc[names["name"] == self.name, "name"] = new_name
+        os.rename(os.path.join("database", "customer", f"{self.name}.csv"), os.path.join(
+            "database", "customer", f"{new_name}.csv"))
+        names.to_csv(os.path.join('database', "names.csv"), index=False)
 
 
 app = ServerUI()
