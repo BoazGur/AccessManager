@@ -331,6 +331,7 @@ class PageOne(tk.Frame):
     def update_customer_name(self):# this func will be change customer_name
        #self.customers_names[name]=updeted_names # update it to server.py
         pass
+    
 app = ServerUI()
 app.title("Access Manager")
 app.geometry("1700x800")

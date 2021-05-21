@@ -20,14 +20,15 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
                 print("waiting to server to come up")
             else:
                 break    
-        self.sites_to_block=[["https://www.one.co.il",0,23]]    #[[url1,start,end],[url2.start,end]]
-        print("connected")         
+        print("connected")
+        self.sites_to_block=[["https:/www.facebook.com/",0,23],["https://www.one.co.il/",0,23],["https:/www.instagram.com",0,23]]    #[[url1,start,end],[url2.start,end]]
+                 
 
     def run(self):
         self.first_message()
         while True:
-            self.limitation()
-            #self.block_websites() 
+            #self.limitation()
+            self.block_websites() 
             time.sleep(1)
             self.history()
                      
@@ -65,11 +66,11 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
     def block_websites(self):
         for websites in self.sites_to_block:
             if dt(dt.now().year, dt.now().month, dt.now().day, websites[1]) < dt.now() < dt(dt.now().year, dt.now().month, dt.now().day, websites[2]): # fuck off go to work
-                print("Do the work ....")
+                print("Do the work ....")      
                 with open(default_folder, 'r+') as hostfile:
                     hosts = hostfile.read()
                     if websites[0] not in hosts:
-                        hostfile.write(redirect + ' ' + websites[0] + '\n')
+                        hostfile.write(redirect+' '+websites[0]+"\n")
             else:
                 with open(default_folder, 'r+') as hostfile:
                     hosts = hostfile.readlines()
@@ -79,8 +80,8 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
                             hostfile.write(host)
                     hostfile.truncate()
                 print("Good Time...")
-            time.sleep(3)
-
+            #time.sleep(3)
+        
 def main():
     client = Client()
     client.run()

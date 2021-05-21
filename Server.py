@@ -92,8 +92,10 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         full_table["url"]=history[history.columns[0]]
         full_table["name"]=history[history.columns[1]]
         full_table["date"]=history[history.columns[2]]
+        full_table["blocked"]="False"
+        full_table["perm"]="False"
         full_table=full_table[full_table.date != "1601-01-01 02:00:00"]
-        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"), index=False,)      
+        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"), index=False)      
 
     def limitation(self,msg,url,start,end):
         if self.current_socket in self.wlist:
