@@ -126,16 +126,16 @@ class PageOne(tk.Frame):
         wrapper3.pack(fill="both", expand=True, padx=20, pady=10)
 
         # -----Table
-        self.trv = ttk.Treeview(wrapper1, columns=(
-            1, 2, 3, 4, 5, 6, 7, 8), show="headings", height=6)
+        columns = [i for i in range(1, 9)]
+        self.trv = ttk.Treeview(wrapper1, columns=columns, show="headings", height=6)
         self.trv.pack()
 
         self.trv.heading(1, text="ID")
         self.trv.heading(2, text="URL")
         self.trv.heading(3, text="Site Name")
         self.trv.heading(4, text="Date")
-        self.trv.heading(5, text="Blocked")
-        self.trv.heading(6, text="Permanent")
+        self.trv.heading(5, text="Blocked", command=lambda: self.treeview_sort_column(5, False))
+        self.trv.heading(6, text="Permanent", command=lambda: self.treeview_sort_column(6, False))
         self.trv.heading(7, text="Start")
         self.trv.heading(8, text="End")
 
@@ -223,6 +223,17 @@ class PageOne(tk.Frame):
         else:
             self.ent_start.configure(state="disabled")
             self.ent_end.configure(state="disabled")
+
+    def treeview_sort_column(self, col, reverse):
+        l = [(self.trv.set(k, col), k) for k in self.trv.get_children('')]
+        l.sort(reverse=reverse)
+
+        # rearrange items in sorted positions
+        for index, (val, k) in enumerate(l):
+            self.trv.move(k, '', index)
+
+        # reverse sort next time
+        self.trv.heading(col, command=lambda _col=col: self.treeview_sort_column(_col, not reverse))
 
     def hide_perm(self):
         if self.blocked_val.get():
@@ -315,7 +326,6 @@ class PageOne(tk.Frame):
             return True
 
     def get_row(self, event):
-        row_id = self.trv.identify_row(event.y)
         item = self.trv.item(self.trv.focus())
         self.id_val.set(item["values"][0])
         self.url_val.set(item["values"][1])
@@ -325,6 +335,9 @@ class PageOne(tk.Frame):
         self.perm_val.set(item["values"][5])
         self.start_val.set(item["values"][6])
         self.end_val.set(item["values"][7])
+
+        self.hide_perm()
+        self.hide_time()
 
     def update_table(self):
         self.update(self.data.itertuples())
