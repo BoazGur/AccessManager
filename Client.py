@@ -11,7 +11,7 @@ redirect = "127.0.0.1"
 computer_name=socket.gethostname()
 
 class Client():#TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
-    def __init__(self, port=8810, ip="192.168.1.26"):# ip wiil change
+    def __init__(self, port=8810, ip="192.168.1.28"):# ip wiil change
         self.s = socket.socket()
         while True:
             try:
@@ -19,7 +19,7 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
             except Exception as e:
                 print("waiting to server to come up")
             else:
-                break    
+                break  
         print("connected")
         self.sites_to_block=[["https:/www.facebook.com/",0,23],["https://www.one.co.il/",0,23],["https:/www.instagram.com",0,23]]    #[[url1,start,end],[url2.start,end]]
                  
@@ -27,8 +27,8 @@ class Client():#TODO: ip working,make it exe,always on - turns on restart, all p
     def run(self):
         self.first_message()
         while True:
-            #self.limitation()
-            self.block_websites() 
+            self.limitation()
+            #self.block_websites() 
             time.sleep(1)
             self.history()
                      
