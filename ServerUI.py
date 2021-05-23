@@ -106,9 +106,12 @@ class PageOne(tk.Frame):
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
 
+        btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
+        btn_rename.pack()
+
         button1 = tk.Button(frame1, text="Back to Home",
                             command=lambda: controller.show_frame(0))
-        button1.pack()
+        button1.pack(side="left", padx=10)
 
         label = tk.Label(frame1, text=f"{name}", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
@@ -389,12 +392,13 @@ class PageOne(tk.Frame):
         return True
 
     def update_customer_name(self):  # this func will be change customer_name
-       # self.customers_names[name]=updeted_names # update it to server.py
         new_name = "None"  # TODO Need to get somewhere the new name
+        Server.customers_names[self.name] = new_name # update it to server.py
         names.loc[names["name"] == self.name, "name"] = new_name
         os.rename(os.path.join("database", "customer", f"{self.name}.csv"), os.path.join(
             "database", "customer", f"{new_name}.csv"))
         names.to_csv(os.path.join('database', "names.csv"), index=False)
+        self.name = new_name
 
 
 app = ServerUI()
