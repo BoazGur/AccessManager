@@ -106,15 +106,15 @@ class PageOne(tk.Frame):
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
 
-        btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
-        btn_rename.pack()
-
         button1 = tk.Button(frame1, text="Back to Home",
                             command=lambda: controller.show_frame(0))
-        button1.pack(side="left", padx=10)
+        button1.pack(fill="y", side="left", padx=10, pady=10)
+
+        btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
+        btn_rename.pack(pady=10)
 
         label = tk.Label(frame1, text=f"{name}", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
+        label.pack(side="bottom", pady=10, padx=10)
 
         #-----------------------Table and More
         frame2 = tk.Frame(self, bg="#000009")
