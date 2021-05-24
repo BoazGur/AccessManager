@@ -86,7 +86,7 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
                     break                 
                 f.write(file)
         f.close()
-        history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False)#delim_whitespace=True
+        history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False,encoding='utf-8-sig')#delim_whitespace=True
            
         full_table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         full_table["url"]=history[history.columns[0]]
@@ -95,7 +95,7 @@ class Server():#TODO: ip working,make it exe,always on - turns on restart
         full_table["blocked"]="False"
         full_table["perm"]="False"
         full_table=full_table[full_table.date != "1601-01-01 02:00:00"]
-        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"), index=False)      
+        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"),index=False,encoding='utf-8-sig')      
 
     def limitation(self,msg,url,start,end):
         if self.current_socket in self.wlist:
