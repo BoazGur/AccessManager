@@ -7,7 +7,7 @@ import tkcalendar
 import pandas as pd
 from functools import partial
 import os
-from Server import *
+#from Server import *
 from urllib import request
 
 LARGE_FONT = ("Verdana", 20)
@@ -298,7 +298,7 @@ class PageOne(tk.Frame):
             if blocked == "True":
                 if self.is_valid_url(url):
                     if perm == True:
-                        Server.limitation("add url", url, -1, 25)
+                        Server.limitation("add url", url, 0, 23)
                     else:
                         Server.limitation("add url", url, start, end)
                 else:
@@ -329,7 +329,7 @@ class PageOne(tk.Frame):
                 if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False)[0]:
                     if self.is_valid_url(url):
                         if perm == True:
-                            Server.limitation("add url", url, -1, 25)
+                            Server.limitation("add url", url, 0, 23)
                         else:
                             Server.limitation("add url", url, start, end)
                     else:

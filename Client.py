@@ -6,12 +6,15 @@ from datetime import datetime as dt
 
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
-default_folder = window_host 
+default_folder = linux_host 
 redirect = "127.0.0.1"
 computer_name=socket.gethostname()
 
+oran = "192.168.1.28"
+amal_b = "10.30.57.83"
+
 class Client():#TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
-    def __init__(self, port=8810, ip="192.168.1.26"):# ip wiil change
+    def __init__(self, port=8810, ip="0.0.0.0"):# ip wiil change
         self.s = socket.socket()
         while True:
             try:
