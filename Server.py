@@ -27,9 +27,7 @@ def operating_system():
 class Server():  # TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         self.server_socket = socket.socket()
-        hostname = socket.gethostname()
-        local_ip = socket.gethostbyname(hostname)
-        self.server_socket.bind((local_ip, port))
+        self.server_socket.bind(("", port))
         self.server_socket.listen()
         print("[Server]: Server is up and running")
 
@@ -111,7 +109,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         f.close()
         # delim_whitespace=True
         history = pd.read_csv(
-            f"history%{updated_name}.csv", engine="python", error_bad_lines=False, encoding="utf8-sig")
+            f"history%{updated_name}.csv", engine="python", error_bad_lines=False, encoding="utf8")
 
         full_table = pd.DataFrame(
             columns=["url", "name", "date", "blocked", "perm", "start", "end"])
