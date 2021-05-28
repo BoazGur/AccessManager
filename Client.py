@@ -2,12 +2,13 @@ import socket
 import os
 import time
 import browserhistory as bh
+import platform
 from datetime import datetime as dt
 
 
 linux_host = '/etc/hosts'
 window_host = r"C:\Windows\System32\drivers\etc\hosts"
-default_folder = linux_host
+default_folder = ""
 redirect = "127.0.0.1"
 computer_name = socket.gethostname()
 
@@ -18,6 +19,17 @@ boaz = "192.168.14.92"
 hostname = socket.gethostname()
 local_ip = socket.gethostbyname(hostname)
 
+
+
+def operating_system():
+    global default_folder
+    os_name = platform.system()
+    if os_name == "Linux":
+        default_folder = linux_host
+    elif os_name == "Windows":
+        default_folder = window_host
+        
+        
 
 class Client():  # TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip=boaz):  # ip wiil change
@@ -30,15 +42,15 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
             else:
                 break
         # [[url1,start,end],[url2.start,end]]
-        self.sites_to_block = [["https://www.one.co.il", 0, 23]]
+        self.sites_to_block = [["www.one.co.il", 0, 23], ["one.co.il", 0, 23]]
         print("connected")
 
     def run(self):
         self.first_message()
         while True:
+            self.block_websites()
             self.limitation()
-            # self.block_websites()
-            time.sleep(1)
+            time.sleep(0.5)
             self.history()
 
     def first_message(self):
@@ -94,6 +106,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
 
 
 def main():
+    operating_system()
     client = Client()
     client.run()
 

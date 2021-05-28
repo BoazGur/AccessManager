@@ -16,12 +16,28 @@ names = pd.read_csv(os.path.join("database", "names.csv"))
 def operating_system():
     os_name = platform.system()
     if os_name == "Linux":
-        os.system("crontab -e")
-        os.system("@reboot python3 Server.py")
+        os.system("sudo touch /lib/systemd/system/test-py.service")
+        with open("/lib/systemd/system/test-py.service", "r+") as service:
+            s = service.read()
+            s.write("""[Unit]
+            Description=Test Service
+            After=multi-user.target
+            Conflicts=getty@tty1.service
+
+            [Service]
+            Type=simple
+            ExecStart=/usr/bin/python /home/boaz/Desktop/Programming/python/CyberProject/Server.py
+            StandardInput=tty-force
+
+            [Install]
+            WantedBy=multi-user.target     
+            """)
+        os.system("sudo systemctl daemon-reload")
+        os.system("sudo systemctl enable test-py.service")
+        os.system("sudo systemctl start test-py.service")
     elif os_name == "Windows":
         address = os.path.join("C:", "Users", getpass.getuser(), "AppData", "Roaming", "Microsoft",
                                "Windows", "Start Menu", "Programs, StartUp")  # TODO Change to exe later
-        
 
 
 class Server():  # TODO: ip working,make it exe,always on - turns on restart

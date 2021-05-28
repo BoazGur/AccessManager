@@ -10,10 +10,15 @@ from urllib import request
 import urllib3
 from Server import Server as s
 import pandas as pd
+import time
+from datetime import datetime as dt
 
 df = pd.read_csv("database/customer/DESKTOP-OTB45S1.csv")
 names = pd.read_csv(os.path.join("database", "names.csv"))
-
+Window_host = r"C:\Windows\System32\drivers\etc\hosts"
+default_hoster = "/etc/hosts"
+redirect = "127.0.0.1"
+sites_to_block = ["www.twitter.com","twitter.com", "www.he.wikipedia.org/wiki/עדי_אופיר", "he.wikipedia.org/wiki/עדי_אופיר"]
 
 def host_name():
     print(socket.gethostname())
@@ -34,6 +39,25 @@ def history():
     # print(bh.get_database_paths())
     # print(bh.get_username())
 
+def block_websites(start_hour , end_hour):
+    while True:
+        if dt(dt.now().year, dt.now().month, dt.now().day,start_hour)< dt.now() < dt(dt.now().year, dt.now().month, dt.now().day,end_hour): 
+            print("Do the work ....")
+            with open(default_hoster, 'r+') as hostfile:
+                hosts = hostfile.read()
+                for site in  sites_to_block:
+                    if site not in hosts:
+                       hostfile.write(redirect+' '+site+'\n')
+        else:
+            with open(default_hoster, 'r+') as hostfile:
+                hosts = hostfile.readlines()
+                hostfile.seek(0)
+                for host in hosts:
+                    if not any(site in host for site in sites_to_block):
+                        hostfile.write(host)
+                hostfile.truncate()
+            print('Good Time')
+        time.sleep(3)
 
 def ip():
     hostname = socket.gethostname()
@@ -88,7 +112,8 @@ def main():
     # folder_test()
     # valid()
     # table()
-    update_customer_name()
+    #update_customer_name()
+    block_websites(0,23)
 
 
 if __name__ == '__main__':

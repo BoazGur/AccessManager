@@ -7,6 +7,8 @@ import tkcalendar
 import pandas as pd
 from functools import partial
 import os
+import getpass
+import platform
 #from Server import *
 from urllib import request
 
@@ -27,6 +29,17 @@ lst_names = [""] + names["name"].tolist()
 
 pages = []
 
+
+os_name = platform.system()
+if os_name == "Linux":
+    pass
+elif os_name == "Windows":
+    bat_path = os.path.join("C:", "Users", getpass.getuser(),
+                            "AppData", "Roaming", "Microsoft","Windows", "Start Menu", "Programs", "StartUp")  # TODO Change to exe later
+    file_path = os.path.join("D:","Python_Code_11","Access_Manager","ServerUI.py")
+    #bat_path = r'C:\Users%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup' % USER_NAME
+    with open(bat_path + "\\" + "open.bat", "w+") as bat_file:
+        bat_file.write(file_path)
 
 class ServerUI(tk.Tk):
     def __init__(self, *args, **kwargs):
