@@ -24,9 +24,7 @@ def operating_system_starup():
 class Server():  # TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         self.server_socket = socket.socket()
-        hostname = socket.gethostname()
-        local_ip = socket.gethostbyname(hostname)
-        self.server_socket.bind((local_ip, port))
+        self.server_socket.bind(("", port))
         self.server_socket.listen()
         print("[Server]: Server is up and running")
 
