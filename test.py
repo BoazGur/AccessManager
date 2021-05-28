@@ -1,30 +1,17 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
-import socket
-import sys
-import os
-import re
-import browserhistory as bh
+import socket,sys,os,time,pathlib,getpass,ctypes
 from urllib import request
-import urllib3
-#from Server import Server as s
+import browserhistory as bh
 import pandas as pd
 from datetime import datetime as dt
-import time
+import platform,platform,getpass,pathlib,shutil
 
 Window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_hoster = Window_host
 redirect = "127.0.0.1"
-sites_to_block = ["www.one.co.il","www.instagram.com"]
-
-
-df = pd.read_csv("database/customer/DESKTOP-OTB45S1.csv")
-names = pd.read_csv(os.path.join("database", "names.csv"))
-
-
-def host_name():
-    print(socket.gethostname())
+sites_to_block = ["www.one.co.il","instagram.com","www.instagram.com","www.walla.co.il","www.wikipedia.org"]
 
 
 def history():
@@ -53,14 +40,12 @@ def folder_test():
     print(os.listdir("D:\Python_Code_11\Access_Manager\database"))
 
 
-def valid():
-    resp = None
-    try:
-        resp = request.urlopen("https://www.google.co.il/?hl=iw")
-    except Exception:
-        print("no")
-    else:
-        print("yes")
+def is_valid_url(self, url):
+        try:
+            request.urlopen(url)
+        except Exception:
+            return False
+        return True
 
 
 def lst():
@@ -98,14 +83,50 @@ def block_websites(start_hour , end_hour):
                         hostfile.write(host)
                 hostfile.truncate()
             print('Good Time')
-        time.sleep(3)
+        time.sleep(0.5)
+        
+def start():
+    os_name = platform.system()
+    if os_name == "Linux":
+        os.system("crontab -e")
+        os.system("@reboot python3 testUI.exe")
+
+    elif os_name == "Windows":
+        new_path =f'C:\\Users\\{getpass.getuser()}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup'
+        file_path ="D:\\Python_Code_11\\Access_Manager\\testUI.exe"
+
+        if file_path==new_path:
+            return
+        else:
+           #TODO change to exe
+            #os.symlink(file_path,new_path)
+            shutil.copyfile(file_path,new_path)         
+        
 def main():  
     #history()
     #ip()
     #folder_test()
     #valid()
     #table()
-    block_websites(0,23)
+    #print(is_valid_url())
+    #block_websites(0,23)
+    start()
     
+    # file_path =pathlib.Path().absolute()
+    # print(file_path)
+    # #bat_path =f'C:\\Users\\{getpass.getuser()}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup'
+    # #print(bat_path)
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False    
+
 if __name__ == '__main__':
-    main()
+    if is_admin():
+        #pass
+        main()
+    else:
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)#sys.argv[1:] if exe
+        main()

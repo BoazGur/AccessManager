@@ -6,7 +6,7 @@ from tkinter import messagebox
 import tkcalendar
 import pandas as pd
 from functools import partial
-import os
+import os,platform,getpass
 from Server import *
 from urllib import request
 
@@ -20,6 +20,7 @@ for file in os.listdir(os.path.join("database", "customer")):
     filename = file.split(".")[0]
     data[filename] = pd.read_csv(
         os.path.join("database", "customer", f"{file}"))
+    data[filename] = data[filename].fillna("")
     #data[filename].index += 1
 
 lst_names = [""] + names["name"].tolist()
@@ -107,10 +108,13 @@ class PageOne(tk.Frame):
 
         button1 = tk.Button(frame1, text="Back to Home",
                             command=lambda: controller.show_frame(0))
-        button1.pack()
+        button1.pack(fill="y", side="left", padx=10, pady=10)
+
+        btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
+        btn_rename.pack(pady=10)
 
         label = tk.Label(frame1, text=f"{name}", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
+        label.pack(side="bottom", pady=10, padx=10)
 
         #-----------------------Table and More
         frame2 = tk.Frame(self, bg="#000009")
@@ -126,16 +130,28 @@ class PageOne(tk.Frame):
         wrapper3.pack(fill="both", expand=True, padx=20, pady=10)
 
         # -----Table
+        trv_scrolly = Scrollbar(wrapper1) 
+        trv_scrolly.pack(side="right", fill="y")
+
+        trv_scrollx = Scrollbar(wrapper1, orient="horizontal")
+        trv_scrollx.pack(side="bottom", fill="x")
+
         columns = [i for i in range(1, 9)]
-        self.trv = ttk.Treeview(wrapper1, columns=columns, show="headings", height=6)
+        self.trv = ttk.Treeview(wrapper1, columns=columns,
+                                show="headings", height=12, yscrollcommand=trv_scrolly.set, xscrollcommand=trv_scrollx.set)
         self.trv.pack()
+
+        trv_scrolly.config(command=self.trv.yview)
+        trv_scrollx.config(command=self.trv.xview)
 
         self.trv.heading(1, text="ID")
         self.trv.heading(2, text="URL")
         self.trv.heading(3, text="Site Name")
         self.trv.heading(4, text="Date")
-        self.trv.heading(5, text="Blocked", command=lambda: self.treeview_sort_column(5, False))
-        self.trv.heading(6, text="Permanent", command=lambda: self.treeview_sort_column(6, False))
+        self.trv.heading(5, text="Blocked",
+                         command=lambda: self.treeview_sort_column(5, False))
+        self.trv.heading(6, text="Permanent",
+                         command=lambda: self.treeview_sort_column(6, False))
         self.trv.heading(7, text="Start")
         self.trv.heading(8, text="End")
 
@@ -218,11 +234,11 @@ class PageOne(tk.Frame):
 
     def hide_time(self):
         if self.perm_val.get():
-            self.ent_start.configure(state="normal")
-            self.ent_end.configure(state="normal")
-        else:
             self.ent_start.configure(state="disabled")
             self.ent_end.configure(state="disabled")
+        else:
+            self.ent_start.configure(state="normal")
+            self.ent_end.configure(state="normal")
 
     def treeview_sort_column(self, col, reverse):
         l = [(self.trv.set(k, col), k) for k in self.trv.get_children('')]
@@ -233,13 +249,18 @@ class PageOne(tk.Frame):
             self.trv.move(k, '', index)
 
         # reverse sort next time
-        self.trv.heading(col, command=lambda _col=col: self.treeview_sort_column(_col, not reverse))
+        self.trv.heading(
+            col, command=lambda _col=col: self.treeview_sort_column(_col, not reverse))
 
     def hide_perm(self):
         if self.blocked_val.get():
             self.check_box_perm.configure(state="normal")
+            self.ent_start.configure(state="normal")
+            self.ent_end.configure(state="normal")
         else:
             self.check_box_perm.configure(state="disabled")
+            self.ent_start.configure(state="disabled")
+            self.ent_end.configure(state="disabled")
 
     def clear_entries(self):
         self.ent_id.delete(0, END)
@@ -303,27 +324,31 @@ class PageOne(tk.Frame):
         start = self.start_val.get()
         end = self.end_val.get()
 
-        if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
-            if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False)[0]:
-                if self.is_valid_url(url):
-                    if perm == True:
-                        Server.limitation("add url", url, 0, 23)
+        if id != "":
+            if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
+                if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False)[0]:
+                    if self.is_valid_url(url):
+                        if perm == True:
+                            Server.limitation("add url", url, 0, 23)
+                        else:
+                            Server.limitation("add url", url, start, end)
                     else:
-                        Server.limitation("add url", url, start, end)
-                else:
-                    messagebox.showerror(
-                        "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
-            elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True)[0]:
-                Server.limitation("remove url", url, start, end)
+                        messagebox.showerror(
+                            "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
+                elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True)[0]:
+                    Server.limitation("remove url", url, start, end)
 
-            self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
-                                                       "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
-            self.data.to_csv(os.path.join(
-                "database", "customer", f"{self.name}.csv"), index=False)
-            self.update_table()
-            self.clear_entries()
+                self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
+                                                           "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
+                self.data.to_csv(os.path.join(
+                    "database", "customer", f"{self.name}.csv"), index=False)
+                self.update_table()
+                self.clear_entries()
+            else:
+                return True
         else:
-            return True
+            messagebox.showerror("Invalid Input",
+                                 "Please select a record (or change ID value) to update the record.")
 
     def get_row(self, event):
         item = self.trv.item(self.trv.focus())
@@ -349,8 +374,14 @@ class PageOne(tk.Frame):
 
     def update(self, rows):
         self.trv.delete(*self.trv.get_children())
-        for i in rows:
-            self.trv.insert('', 'end', value=i)
+        for i, row in enumerate(rows):
+            if i % 2 == 0:
+                self.trv.insert('', 'end', value=row, tags=("even"))
+            else:
+                self.trv.insert('', 'end', value=row, tags=("odd"))
+
+        self.trv.tag_configure("even", background="#99cccc")
+        self.trv.tag_configure("odd", background="#fff0f5")
 
     def is_valid_url(self, url):
         try:
@@ -361,15 +392,15 @@ class PageOne(tk.Frame):
         return True
 
     def update_customer_name(self):  # this func will be change customer_name
-       # self.customers_names[name]=updeted_names # update it to server.py
         new_name = "None"  # TODO Need to get somewhere the new name
+        Server.customers_names[self.name] = new_name # update it to server.py
         names.loc[names["name"] == self.name, "name"] = new_name
         os.rename(os.path.join("database", "customer", f"{self.name}.csv"), os.path.join(
             "database", "customer", f"{new_name}.csv"))
         names.to_csv(os.path.join('database', "names.csv"), index=False)
-
-
+        self.name = new_name
+        
 app = ServerUI()
 app.title("Access Manager")
-app.geometry("1700x800")
+app.geometry("1600x900")
 app.mainloop()
