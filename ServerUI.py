@@ -6,10 +6,15 @@ from tkinter import messagebox
 import tkcalendar
 import pandas as pd
 from functools import partial
+<<<<<<< HEAD
 import os
 import getpass
 import platform
 #from Server import *
+=======
+import os,platform,getpass
+from Server import *
+>>>>>>> 6f3db6d0885921343dbfba5f0de513d60981236b
 from urllib import request
 
 LARGE_FONT = ("Verdana", 20)
@@ -412,8 +417,7 @@ class PageOne(tk.Frame):
             "database", "customer", f"{new_name}.csv"))
         names.to_csv(os.path.join('database', "names.csv"), index=False)
         self.name = new_name
-
-
+        
 app = ServerUI()
 app.title("Access Manager")
 app.geometry("1600x900")

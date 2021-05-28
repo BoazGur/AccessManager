@@ -1,11 +1,6 @@
-import socket
-import select
-import os
-import platform
-import getpass
+import socket,select,os,platform,getpass
 import browserhistory as bh
 import pandas as pd
-#from ServerUI import *
 
 MAX_MESSAGE_LENGTH = 1024
 #names = pd.read_csv(r"D:\Python_Code_11\Access_Manager\database\names.csv")
@@ -13,7 +8,7 @@ MAX_MESSAGE_LENGTH = 1024
 names = pd.read_csv(os.path.join("database", "names.csv"))
 
 
-def operating_system():
+def operating_system_starup():
     os_name = platform.system()
     if os_name == "Linux":
         os.system("sudo touch /lib/systemd/system/test-py.service")
@@ -36,10 +31,20 @@ def operating_system():
         os.system("sudo systemctl enable test-py.service")
         os.system("sudo systemctl start test-py.service")
     elif os_name == "Windows":
+<<<<<<< HEAD:Server.py
         address = os.path.join("C:", "Users", getpass.getuser(), "AppData", "Roaming", "Microsoft",
                                "Windows", "Start Menu", "Programs, StartUp")  # TODO Change to exe later
 
 
+=======
+        bat_path = os.path.join("C:", "Users", getpass.getuser(),
+                               "AppData", "Roaming", "Microsoft","Windows", "Start Menu", "Programs, StartUp")  # TODO Change to exe later
+        file_path = os.path.dirname(os.path.realpath(__file__))
+        #bat_path = r'C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup' % USER_NAME
+        with open(bat_path + '\\' + "open.bat", "w+") as bat_file:
+            bat_file.write(r'start "" %s' % file_path)
+            
+>>>>>>> 6f3db6d0885921343dbfba5f0de513d60981236b:server/Server.py
 class Server():  # TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         self.server_socket = socket.socket()
@@ -57,8 +62,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
 
     def get_requests(self):
         while True:
-            self.rlist, self.wlist, self.xlist = select.select(
-                [self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
+            self.rlist, self.wlist, self.xlist = select.select([self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
 
             self.receive()
             self.respond()
@@ -70,11 +74,14 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                 self.messages_to_send.append((connection, ""))
             else:
                 print("Data from existing client")
-                data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
-                if data == "exit":
-                    self.exit()
-                else:
-                    self.messages_to_send.append((self.current_socket, data))
+                data=""
+                try:
+                    data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
+                except Exception:
+                    self.client_exit()
+                else: 
+                    if data!="connection_available?":   
+                        self.messages_to_send.append((self.current_socket, data))
 
     def respond(self):
         for message in self.messages_to_send:
@@ -87,8 +94,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                     self.history(request[1])
                 else:
                     # can not run self.promblem beacuse it wiil get stuck
-                    self.current_socket.send(
-                        "[Error]: Unknown command".encode())
+                    self.current_socket.send("[Error]: Unknown command".encode())
                 self.messages_to_send.remove(message)
 
     def create_connection(self):
@@ -123,27 +129,28 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                     break
                 f.write(file)
         f.close()
-        # delim_whitespace=True
-        history = pd.read_csv(
-            f"history%{updated_name}.csv", engine="python", error_bad_lines=False, encoding="utf8")
+        try:
+            history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False,encoding='utf-8-sig')#encoding='utf-8-sig')#delim_whitespace=True
+        except  Exception:
+            #print("Exception")
+            history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False)     
+        full_table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+        full_table["url"]=history[history.columns[0]]
+        full_table["name"]=history[history.columns[1]]
+        full_table["date"]=history[history.columns[2]]
+        full_table["blocked"]="False"
+        full_table["perm"]="False"
+        full_table=full_table[full_table.date != "1601-01-01 02:00:00"]
+        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"),index=False),#encoding='utf-8-sig')      
 
-        full_table = pd.DataFrame(
-            columns=["url", "name", "date", "blocked", "perm", "start", "end"])
-        full_table["url"] = history[history.columns[0]]
-        full_table["name"] = history[history.columns[1]]
-        full_table["date"] = history[history.columns[2]]
-        full_table = full_table[full_table.date != "1601-01-01 02:00:00"]
-        full_table.to_csv(os.path.join('database', 'customer',
-                                       f"{updated_name}.csv"), index=False,)
-
-    def limitation(self, msg, url, start, end):
+    def limitation(self,msg,url,start,end):
         if self.current_socket in self.wlist:
-            self.current_socket.send(f"{msg}%{url}%{start}%{end}".encode())
+            self.current_socket.send(f"{msg}^^^{url}^^^{start}^^^{end}".encode())
 
     def print_message(self, message, client_address):  # to be deleted
         print(f"[{client_address}] {message}")
 
-    def exit(self):
+    def client_exit(self):
         self.print_message("has disconnected...",
                            self.current_socket.getpeername())
         self.open_client_sockets.remove(self.current_socket)
