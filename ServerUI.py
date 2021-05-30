@@ -1,3 +1,4 @@
+from Server import *
 from tkinter import *
 import tkinter as tk
 import tkinter.font as tkFont
@@ -7,7 +8,7 @@ import tkcalendar
 import pandas as pd
 from functools import partial
 import os,platform,getpass
-from Server import *
+
 from urllib import request
 
 LARGE_FONT = ("Verdana", 20)
@@ -101,7 +102,7 @@ class PageOne(tk.Frame):
         self.perm_val = BooleanVar()
         self.start_val = StringVar()
         self.end_val = StringVar()
-
+        self.Server=Server
         # -----------------------Welcome to name frame
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")

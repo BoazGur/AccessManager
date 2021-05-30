@@ -11,7 +11,7 @@ import platform,platform,getpass,pathlib,shutil
 Window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_hoster = Window_host
 redirect = "127.0.0.1"
-sites_to_block = ["www.one.co.il","instagram.com","www.instagram.com","www.walla.co.il","www.wikipedia.org"]
+sites_to_block = ["www.one.co.il","instagram.com","www.instagram.com","www.walla.co.il",]
 
 
 def history():
@@ -109,8 +109,8 @@ def main():
     #valid()
     #table()
     #print(is_valid_url())
-    #block_websites(0,23)
-    start()
+    block_websites(0,23)
+    #start()
     
     # file_path =pathlib.Path().absolute()
     # print(file_path)
