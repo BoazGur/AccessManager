@@ -23,8 +23,12 @@ def operating_system():#TODO add startup capability
     if os_name == "Linux":
         default_folder = linux_host
     elif os_name == "Windows":
+<<<<<<< HEAD
         default_folder = window_host     
         
+=======
+        default_folder = window_host    
+>>>>>>> 084803ad152e8c2da4930dc811ad9cdb0cc57214
 
 class Client():  # TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip=oran):  # ip wiil change
@@ -41,13 +45,14 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                 break
         print("connected")
         self.sites_to_block=[]    #[[url1,start,end],[url2.start,end]]
-                 
+              
     def run(self):
         """
         The main function of the class, calls to the other functions in the class
         """
         while True:
-            self.block_websites() 
+            self.block_websites()
+            time.sleep(1) 
             self.limitation()
             self.history()
                      
@@ -61,23 +66,28 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
         """
         Recieve the limit message from the server and appends the variables to self.sites_to_block list
         """
-        self.s.settimeout(0.1)
+        self.s.settimeout(0.5)
         message=""
         try:
             message=self.s.recv(1024).decode()
         except socket.error:
             pass
         else:
+            print("message is {message}")
             request = message.split("^^^")
             if request[0]== "add url":
-                if request.startswith("www.",6,10):
-                    self.sites_to_block.append([request[1],request[2],request[3]])           
+                if request[1].startswith("www.",6,10):
+                    request[1]=request[1].replace("/","")
+                    self.sites_to_block.append([request[1],request[2],request[3]])
+                               
                 else:
                     request[1]=request[1].split("//")[-1]# to add 
-                    self.sites_to_block.append([request[1],request[2],request[3]])           
+                    self.sites_to_block.append([request[1],int(request[2]),int(request[3])])           
             elif request[0]== "remove url":
-                self.site_to_block[[request[1],request[2],request[3]]]=[request[1],0,0]#remove url from host file
-            
+                for i in range(len(self.site_to_block)):#remove url from host file
+                    if self.site_to_block[i]==[request[1],request[2],request[3]]:
+                        self.site_to_block[i]=[request[1],0,0]
+
     def history(self):
         """
         This function sends to the server the Internet browsing history
@@ -91,7 +101,6 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
             bh.get_browserhistory()   
             bh.write_browserhistory_csv()
             f = open("chrome_history.csv", "rb")
-            print ("Sending Data ....")
             l = f.read(1024)
             while (l):
                 try:
@@ -114,6 +123,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                     hosts = hostfile.read()
                     if websites[0] not in hosts:
                         hostfile.write(redirect+' '+websites[0]+"\n")
+                        print(f"block {websites[0]} ")
             else:
                 with open(default_folder, 'r+') as hostfile:
                     hosts = hostfile.readlines()
@@ -123,7 +133,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                             hostfile.write(host)
                     hostfile.truncate()
                 print("Good Time...")
-        print("Manipulation succeeded") 
+
     
     
     def try_connect(self):
@@ -140,6 +150,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                 print("waiting to server to come up")    
             else:
                 break
+        time.sleep(1)
         return
                 
         

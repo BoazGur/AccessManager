@@ -43,8 +43,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         print("[Server]: Server is up and running")
 
         self.open_client_sockets = []
-        # [(self.current_socket, last data from client)]
-        self.messages_to_send = []
+        self.messages_to_send = [] # [(self.current_socket, last data from client)]
         self.current_socket = None
 
         self.action = {"name": self.create_database, "history": self.history}
@@ -88,10 +87,11 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
             if self.current_socket in self.wlist:
                 request = data.split("%")  # request[1]= name
                 if request[0] == "name":
-                    self.create_database(request[1])
-                    
+                    self.create_database(request[1])  
                 elif request[0] == "history":
                     self.history(request[1])
+                elif request[0]=="limit":
+                    self.current_socket.send(request[1].encode())
                 else:
                     # can not run self.promblem beacuse it wiil get stuck
                     self.current_socket.send("[Error]: Unknown command".encode())
@@ -126,7 +126,6 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         """
         The function reads the Internet browsing data that the client sent and store it in the database
         """
-        
         updated_name = name
         if self.customers_names[name] != "":
             updated_name = self.customers_names[name]
@@ -139,16 +138,14 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                     break
                 f.write(file)
         f.close()
+        
         history_full=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         history=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         try:
             history = pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False,encoding='utf-8-sig')#encoding='utf-8-sig')#delim_whitespace=True
         except pd.errors.EmptyDataError:
             history=history_full
-        # except  Exception:
-        #     #print("Exception")
-        #     history=pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False,delim_whitespace=True)  
-               
+                         
         full_table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         full_table["url"]=history[history.columns[0]]
         full_table["name"]=history[history.columns[1]]
@@ -162,9 +159,14 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         """
         This function send to client the info about the site that needs to be block
         """
-        if self.current_socket in self.wlist:
-            self.current_socket.send(f"{msg}^^^{url}^^^{start}^^^{end}".encode())
-
+        print("enter limitation function ")
+        self.messages_to_send.append(((self.current_socket, f"limit%{msg}^^^{url}^^^{start}^^^{end}")))
+        
+        # if self.current_socket in self.wlist:
+        #     self.current_socket.send(f"{msg}^^^{url}^^^{start}^^^{end}".encode())
+        #     print(f"{msg}^^^{url}^^^{start}^^^{end} noder")
+    
+    
     def print_message(self, message, client_address):  # to be deleted
         print(f"[{client_address}] {message}")
 
@@ -175,11 +177,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         self.print_message("has disconnected...",
                            self.current_socket.getpeername())
         self.open_client_sockets.remove(self.current_socket)
+        
         self.current_socket.close()
 
-def main():
-    server = Server()
-    server.get_requests()
 
-if __name__ == "__main__":
-    main()

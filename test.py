@@ -84,25 +84,6 @@ def table():
     full_table = pd.concat([table, df])
     print(full_table)
 
-def block_websites(start_hour , end_hour):
-    while True:
-        if dt(dt.now().year, dt.now().month, dt.now().day,start_hour)< dt.now() < dt(dt.now().year, dt.now().month, dt.now().day,end_hour): 
-            print("Do the work ....")
-            with open(default_hoster, 'r+') as hostfile:
-                hosts = hostfile.read()
-                for site in  sites_to_block:
-                    if site not in hosts:
-                       hostfile.write(redirect+' '+site+'\n')
-        else:
-            with open(default_hoster, 'r+') as hostfile:
-                hosts = hostfile.readlines()
-                hostfile.seek(0)
-                for host in hosts:
-                    if not any(site in host for site in sites_to_block):
-                        hostfile.write(host)
-                hostfile.truncate()
-            print('Good Time')
-        time.sleep(0.5)
         
 def start():
     os_name = platform.system()
@@ -120,7 +101,21 @@ def start():
            #TODO change to exe
             #os.symlink(file_path,new_path)
             shutil.copyfile(file_path,new_path)         
-        
+
+def table1():
+    data = pd.read_csv(
+        os.path.join("database", "customer", "name1.csv"))
+    print(type(data.loc[data.index == 1,"blocked"]))
+    print(data.loc[data.index == 1,"blocked"].iloc[0])
+    # if data.loc[data.index == 1,"blocked"]== "False":
+    #     print("work")
+    # else:
+    #     print("not")
+def my_sum(*integers):
+    result = 0
+    for x in integers:
+        result += x
+    return result
 def main():  
     #history()
     #ip()
@@ -135,7 +130,10 @@ def main():
     # print(file_path)
     # #bat_path =f'C:\\Users\\{getpass.getuser()}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup'
     # #print(bat_path)
+    table1()
+   
 
+    print(my_sum(1, 2, 3))
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
