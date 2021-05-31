@@ -5,31 +5,13 @@ import socket,sys,os,time,pathlib,getpass,ctypes
 from urllib import request
 import browserhistory as bh
 import pandas as pd
-
-import time
-from datetime import datetime as dt
-
-df = pd.read_csv("database/customer/DESKTOP-OTB45S1.csv")
-names = pd.read_csv(os.path.join("database", "names.csv"))
-Window_host = r"C:\Windows\System32\drivers\etc\hosts"
-default_hoster = "/etc/hosts"
-redirect = "127.0.0.1"
-sites_to_block = ["www.twitter.com","twitter.com", "www.he.wikipedia.org/wiki/עדי_אופיר", "he.wikipedia.org/wiki/עדי_אופיר"]
-
-def host_name():
-    print(socket.gethostname())
-
 from datetime import datetime as dt
 import platform,platform,getpass,pathlib,shutil
 
 Window_host = r"C:\Windows\System32\drivers\etc\hosts"
 default_hoster = Window_host
 redirect = "127.0.0.1"
-
-sites_to_block = ["www.one.co.il","instagram.com","www.instagram.com","www.walla.co.il",]
-
 sites_to_block = ["www.one.co.il","instagram.com","www.instagram.com","www.walla.co.il","www.wikipedia.org"]
-
 
 
 def history():
@@ -142,7 +124,7 @@ def main():
     #table()
     #print(is_valid_url())
     #block_websites(0,23)
-    #start()
+    start()
     
     # file_path =pathlib.Path().absolute()
     # print(file_path)

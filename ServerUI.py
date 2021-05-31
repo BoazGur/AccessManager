@@ -1,5 +1,5 @@
-from Server import *
 from tkinter import *
+from Server import *
 import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import ttk
@@ -339,7 +339,7 @@ class PageOne(tk.Frame):
                         messagebox.showerror(
                             "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
                 elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True).value[0]:
-                    Server.limitation("remove url", url, start, end)
+                    self.server.limitation("remove url", url, start, end)
 
                 self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
                                                            "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
