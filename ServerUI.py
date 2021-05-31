@@ -8,41 +8,19 @@ import tkcalendar
 import pandas as pd
 from functools import partial
 
-import os
-import getpass
-import platform
-#from Server import *
-import os,platform,getpass
+import os,platform,getpass,time
 from urllib import request
+from threading import Thread
+
 
 LARGE_FONT = ("Verdana", 20)
 
-names = pd.read_csv(os.path.join("database", "names.csv"))
+
 
 
 data = {}
-for file in os.listdir(os.path.join("database", "customer")):
-    filename = file.split(".")[0]
-    data[filename] = pd.read_csv(
-        os.path.join("database", "customer", f"{file}"))
-    data[filename] = data[filename].fillna("")
-    #data[filename].index += 1
-
-lst_names = [""] + names["name"].tolist()
 
 pages = []
-
-
-os_name = platform.system()
-if os_name == "Linux":
-    pass
-elif os_name == "Windows":
-    bat_path = os.path.join("C:", "Users", getpass.getuser(),
-                            "AppData", "Roaming", "Microsoft","Windows", "Start Menu", "Programs", "StartUp")  # TODO Change to exe later
-    file_path = os.path.join("D:","Python_Code_11","Access_Manager","ServerUI.py")
-    #bat_path = r'C:\Users%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup' % USER_NAME
-    with open(bat_path + "\\" + "open.bat", "w+") as bat_file:
-        bat_file.write(file_path)
 
 class ServerUI(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -53,14 +31,16 @@ class ServerUI(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
+        names = pd.read_csv(os.path.join("database", "names.csv"))
+        self.lst_names = [""] + names["name"].tolist()
+        
         self.frames = []
-
         pages.append(StartPage)
-        for i in range(len(lst_names) - 1):
+        for i in range(len(self.lst_names) - 1):
             pages.append(PageOne)
 
         for i, F in enumerate(pages):
-            frame = F(self.container, self, lst_names[i])
+            frame = F(self.container, self, self.lst_names[i])
             self.frames.append(frame)
             frame.grid(row=0, column=0, sticky="nsew")
 
@@ -73,6 +53,9 @@ class ServerUI(tk.Tk):
 
 class StartPage(tk.Frame):
     def __init__(self, parent, controller, name=""):
+        names = pd.read_csv(os.path.join("database", "names.csv"))
+        self.lst_names = [""] + names["name"].tolist()
+       
         tk.Frame.__init__(self, parent)
         # -------------------- Welcome Sign
         frame1 = tk.Frame(self, height=35, bg="#000018")
@@ -89,15 +72,13 @@ class StartPage(tk.Frame):
 
         btn_list = []
         j = 0
-        for i, name in enumerate(lst_names[1:]):
+        for i, name in enumerate(self.lst_names[1:]):
             if i % 5 == 0:
                 j += 1
             btn_list.append(tk.Button(frame2, text=name, font=LARGE_FONT,
                                       command=partial(controller.show_frame, i+1)))
             btn_list[i].grid(row=j, column=i % 5, padx=10, pady=10)
-        '''        btn_name1 = tk.Button(frame2, text="name1", font=LARGE_FONT,
-                            command=lambda: controller.show_frame(PageOne))
-        btn_name1.grid(row=0, column=0, padx=10, pady=10)'''
+
 
     def get_names(self):
         return names["name"].tolist()
@@ -117,7 +98,8 @@ class PageOne(tk.Frame):
         self.perm_val = BooleanVar()
         self.start_val = StringVar()
         self.end_val = StringVar()
-        self.Server=Server
+        self.server=server
+        
         # -----------------------Welcome to name frame
         frame1 = tk.Frame(self, height=35, bg="#006aff")
         frame1.pack(fill="both")
@@ -125,7 +107,12 @@ class PageOne(tk.Frame):
         button1 = tk.Button(frame1, text="Back to Home",
                             command=lambda: controller.show_frame(0))
         button1.pack(fill="y", side="left", padx=10, pady=10)
-
+        
+        button2_refresh = tk.Button(frame1, text="Refresh",
+                            command= self.update_table)
+        button2_refresh.pack(fill="y", side="right", padx=10, pady=10)
+        
+            
         btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
         btn_rename.pack(pady=10)
 
@@ -342,16 +329,16 @@ class PageOne(tk.Frame):
 
         if id != "":
             if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
-                if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False)[0]:
+                if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False).values[0]:
                     if self.is_valid_url(url):
                         if perm == True:
-                            Server.limitation("add url", url, 0, 23)
+                            self.server.limitation("add url", url, 0, 23)# TODO update csv
                         else:
-                            Server.limitation("add url", url, start, end)
+                            self.server.limitation("add url", url, start, end)
                     else:
                         messagebox.showerror(
                             "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
-                elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True)[0]:
+                elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True).value[0]:
                     Server.limitation("remove url", url, start, end)
 
                 self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
@@ -389,6 +376,11 @@ class PageOne(tk.Frame):
         self.update(possible.itertuples())
 
     def update(self, rows):
+        table=pd.read_csv(
+        os.path.join("database", "customer", f"{self.name}.csv"))
+        if not table.empty:
+            self.data=table
+
         self.trv.delete(*self.trv.get_children())
         for i, row in enumerate(rows):
             if i % 2 == 0:
@@ -415,8 +407,23 @@ class PageOne(tk.Frame):
             "database", "customer", f"{new_name}.csv"))
         names.to_csv(os.path.join('database', "names.csv"), index=False)
         self.name = new_name
-        
-app = ServerUI()
-app.title("Access Manager")
-app.geometry("1600x900")
-app.mainloop()
+def ui():
+    time.sleep(7)
+    for file in os.listdir(os.path.join("database", "customer")):
+        filename = file.split(".")[0]
+        data[filename] = pd.read_csv(
+            os.path.join("database", "customer", f"{file}"))
+        data[filename] = data[filename].fillna("")        
+    app = ServerUI()
+    app.title("Access Manager")
+    app.geometry("1600x900")
+    app.mainloop()
+
+def server_py():
+    global server
+    server=Server()
+    server.get_requests()
+
+if __name__ == "__main__":
+    Thread(target = ui).start()
+    Thread(target = server_py).start()
