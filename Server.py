@@ -5,7 +5,32 @@ MAX_MESSAGE_LENGTH = 1024
 #names = pd.read_csv(r"D:\Python_Code_11\Access_Manager\database\names.csv")
 #names = pd.read_csv("database\\names.csv")
 names = pd.read_csv(os.path.join("database", "names.csv"))
-           
+
+def operating_system_starup():
+    os_name = platform.system()
+    if os_name == "Linux":
+        os.system("sudo touch /lib/systemd/system/test-py.service")
+        with open("/lib/systemd/system/test-py.service", "r+") as service:
+            s = service.read()
+            s.write("""[Unit]
+            Description=Test Service
+            After=multi-user.target
+            Conflicts=getty@tty1.service
+
+            [Service]
+            Type=simple
+            ExecStart=/usr/bin/python /home/boaz/Desktop/Programming/python/CyberProject/Server.py
+            StandardInput=tty-force
+
+            [Install]
+            WantedBy=multi-user.target     
+            """)
+        os.system("sudo systemctl daemon-reload")
+        os.system("sudo systemctl enable test-py.service")
+        os.system("sudo systemctl start test-py.service")
+    elif os_name == "Windows":
+        pass
+    
 class Server():  # TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         """
