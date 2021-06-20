@@ -1,41 +1,22 @@
-import socket,select,os,platform,getpass
+import socket,select,os
 import pandas as pd
 
 MAX_MESSAGE_LENGTH = 1024
-#names = pd.read_csv(r"D:\Python_Code_11\Access_Manager\database\names.csv")
-#names = pd.read_csv("database\\names.csv")
+
+path_names=os.path.join("database")
+if not os.path.exists(path_names):
+    os.makedirs(path_names)
+    df_names=pd.DataFrame(columns=["name"])
+    df_names.to_csv(os.path.join("database","names.csv"),index=False)
 names = pd.read_csv(os.path.join("database", "names.csv"))
 
-def operating_system_starup():
-    os_name = platform.system()
-    if os_name == "Linux":
-        os.system("sudo touch /lib/systemd/system/test-py.service")
-        with open("/lib/systemd/system/test-py.service", "r+") as service:
-            s = service.read()
-            s.write("""[Unit]
-            Description=Test Service
-            After=multi-user.target
-            Conflicts=getty@tty1.service
-
-            [Service]
-            Type=simple
-            ExecStart=/usr/bin/python /home/boaz/Desktop/Programming/python/CyberProject/Server.py
-            StandardInput=tty-force
-
-            [Install]
-            WantedBy=multi-user.target     
-            """)
-        os.system("sudo systemctl daemon-reload")
-        os.system("sudo systemctl enable test-py.service")
-        os.system("sudo systemctl start test-py.service")
-    elif os_name == "Windows":
-        pass
     
 class Server():  # TODO: ip working,make it exe,always on - turns on restart
     def __init__(self, port=8810):
         """
         creation of server_socket and establish self.variables
         """
+        
         self.server_socket = socket.socket()
         self.server_socket.bind(("", port))
         self.server_socket.listen()
@@ -44,10 +25,8 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         self.open_client_sockets = []
         self.messages_to_send = [] # [(self.current_socket, last data from client)]
         self.current_socket = None
-
-        self.action = {"name": self.create_database, "history": self.history}
-        self.customers_names = {}  # {socket.gethostname():current name}
-
+        self.blocked_url={}# current_socket:[blocked url] 
+       
     def get_requests(self):
         """
         main function in the class,creation of rlist wlist xlist ,calls to self.receive() self.respond() that call to other functions.
@@ -66,9 +45,8 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         for self.current_socket in self.rlist:
             if self.current_socket is self.server_socket:
                 connection = self.create_connection()
-                self.messages_to_send.append((connection, ""))
+                self.blocked_url[connection]=[]
             else:
-                print("Data from existing client")
                 data=""
                 try:
                     data = self.current_socket.recv(MAX_MESSAGE_LENGTH).decode()
@@ -90,6 +68,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                 elif request[0] == "history":
                     self.history(request[1])
                 elif request[0]=="limit":
+                    print("send limit to client")
                     self.current_socket.send(request[1].encode())
                 else:
                     # can not run self.promblem beacuse it wiil get stuck
@@ -103,33 +82,40 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         connection, client_address = self.current_socket.accept()
         self.print_message("has joined!", client_address)
         self.open_client_sockets.append(connection)
+        return connection
 
     def create_database(self, name):  # add name to table
         """
         in charge of creating database that will store Internet browsing history of the client"
         """
         global names
-        self.customers_names[name] = ""
-
         if name not in list(names["name"]):
+            path=os.path.join("database", "customers",f"{name}")
+            os.makedirs(path)
+            
             names = names.append({"name": name}, ignore_index=True)
             names.to_csv(os.path.join("database", "names.csv"), index=False)
 
-        df = pd.DataFrame(
-            columns=["url", "name", "date", "blocked", "perm", "start", "end"])
-        # PermissionError: [Errno 13] Permission denied: if file is open
-        df.to_csv(os.path.join('database', 'customer',
-                               f"{name}.csv"), index=False)
+            df = pd.DataFrame(columns=["url", "name", "date", "blocked", "perm", "start", "end"])    
+            df.to_csv(os.path.join("database", "customers",f"{name}","history.csv"), index=False)
+            
+            df_changes= pd.DataFrame(columns=["url", "name","date","blocked", "perm", "start", "end"])  
+            df_changes.to_csv(os.path.join("database", "customers",f"{name}","changes.csv"), index=False)
+        else:
+            df_changes=pd.read_csv(os.path.join("database", "customers",f"{name}","changes.csv"))
+            df_changes=df_changes[df_changes.blocked!="delete"]
+            sites=df_changes["url"].tolist()
+            for site in sites:
+                if df_changes.loc[df_changes["url"]==site,"blocked"].any()==True:
+                    start=df_changes.loc[df_changes["url"]==site,"start"]
+                    end=df_changes.loc[df_changes["url"]==site,"end"]
+                    self.limitation("add url", site, int(start), int(end))
 
     def history(self, name):  # must be admnstritor
         """
         The function reads the Internet browsing data that the client sent and store it in the database
         """
-        updated_name = name
-        if self.customers_names[name] != "":
-            updated_name = self.customers_names[name]
-
-        path = os.path.join(f"history%{updated_name}.csv")
+        path = os.path.join(f"history%{name}.csv")
         with open(path, 'wb') as f:
             while True:
                 file = self.current_socket.recv(1024)
@@ -138,32 +124,74 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
                 f.write(file)
         f.close()
         
-        history_full=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         history=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+        history_full=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
         try:
-            history = pd.read_csv(f"history%{updated_name}.csv",engine="python",error_bad_lines=False,encoding='utf-8-sig')#encoding='utf-8-sig')#delim_whitespace=True
+            history = pd.read_csv(f"history%{name}.csv",engine="python",error_bad_lines=False,encoding="utf-8-sig")#encoding='utf-8-sig')#delim_whitespace=True
         except pd.errors.EmptyDataError:
             history=history_full
+        except UnicodeDecodeError:
+            history = pd.read_csv(f"history%{name}.csv",engine="python",error_bad_lines=False)
                          
         full_table=pd.DataFrame(columns=["url","name","date","blocked","perm","start","end"])
+        df_changes=pd.read_csv(os.path.join("database", "customers",f"{name}","changes.csv"))
+        self.blocked_url[self.current_socket]=df_changes["url"].tolist()
+            
         full_table["url"]=history[history.columns[0]]
         full_table["name"]=history[history.columns[1]]
         full_table["date"]=history[history.columns[2]]
-        full_table["blocked"]="False"
-        full_table["perm"]="False"
-        full_table=full_table[full_table.date != "1601-01-01 02:00:00"]
-        full_table.to_csv(os.path.join('database','customer',f"{updated_name}.csv"),index=False),#encoding='utf-8-sig')      
+        full_table["blocked"]=full_table["blocked"].apply(lambda  row : False if row!=True else None)  
+        full_table["perm"]=full_table["perm"].fillna(False)
+        full_table["start"]=full_table["start"].fillna(0)
+        full_table["end"]=full_table["end"].fillna(0)
 
+            
+        cols = list(full_table.columns)
+        for site in self.blocked_url[self.current_socket]: # update blocked value if url is blocked
+            #df_changes=df_changes[df_changes.blocked!="delete"]#delet
+            lst=df_changes.loc[df_changes.url==site,"url"].to_numpy().tolist()
+            
+            if len(df_changes["url"].tolist())>0:
+                full_table.loc[full_table.url.isin(lst), cols] = df_changes[df_changes["url"]== site].to_numpy().tolist()
+
+                if lst[0] not in full_table["url"].tolist():# add site
+                    full_table=full_table.append(df_changes.loc[df_changes.url==site,cols],ignore_index=True)   
+                           
+            full_table=full_table[full_table.blocked!="delete"]
+                
+        full_table=full_table[full_table.date != "1601-01-01 02:00:00"]  
+        df_changes.to_csv(os.path.join("database", "customers",f"{name}","changes.csv"),index=False)
+        full_table.to_csv(os.path.join("database","customers",f"{name}","history.csv"),index=False)#encoding='utf-8-sig')      
+        
     def limitation(self,msg,url,start,end):
         """
         This function send to client the info about the site that needs to be block
         """
-        print("enter limitation function ")
-        self.messages_to_send.append(((self.current_socket, f"limit%{msg}^^^{url}^^^{start}^^^{end}")))
+        print("enter limitation function")
+        self.blocked_url[self.current_socket].append(url)
+        self.messages_to_send.append((self.current_socket, f"limit%{msg}^^^{url}^^^{start}^^^{end}"))
+
+    def update_table(self,history,full_table,name):
+        """
+        The function update the history.csv in case of changes that the user makes
+        Returns:[dataframe]: [updated table]
+        """
+        df_changes=pd.read_csv(os.path.join("database", "customers",f"{name}","changes.csv"))
+        self.blocked_url[self.current_socket]=df_changes["url"].tolist()
         
-        # if self.current_socket in self.wlist:
-        #     self.current_socket.send(f"{msg}^^^{url}^^^{start}^^^{end}".encode())
-        #     print(f"{msg}^^^{url}^^^{start}^^^{end} noder")
+        
+        full_table["url"]=history[history.columns[0]]
+        full_table["name"]=history[history.columns[1]]
+        full_table["date"]=history[history.columns[2]]
+        full_table["blocked"]=full_table["blocked"].apply(lambda  row : False if row!=True else None)  
+        # full_table["perm"]=full_table["perm"].apply(lambda  row : False if row!=True else None)  
+        
+        
+        cols = list(full_table.columns)
+        for site in self.blocked_url[self.current_socket]: # update blocked value if url is blocked
+            lst=df_changes.loc[df_changes.url==site,"url"].to_numpy().tolist()
+            full_table.loc[full_table.url.isin(lst), cols] = df_changes[df_changes["url"]== site].to_numpy().tolist()
+        return full_table
     
     
     def print_message(self, message, client_address):  # to be deleted
@@ -178,5 +206,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         self.open_client_sockets.remove(self.current_socket)
         
         self.current_socket.close()
+    
 
+        
 

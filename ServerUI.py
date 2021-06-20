@@ -8,22 +8,21 @@ import tkcalendar
 import pandas as pd
 from functools import partial
 
-import os,platform,getpass,time
+import os,time
 from urllib import request
 from threading import Thread
 
 
 LARGE_FONT = ("Verdana", 20)
-
-
-
-
 data = {}
-
 pages = []
+
 
 class ServerUI(tk.Tk):
     def __init__(self, *args, **kwargs):
+        """
+        Initiates all pages for each name in the name list
+        """
         tk.Tk.__init__(self, *args, **kwargs)
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
@@ -31,7 +30,11 @@ class ServerUI(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
+        # path_names=os.path.join("database", "names.csv")
+        # if not os.path.exists(path_names):
+        #     os.makedirs(path_names)
         names = pd.read_csv(os.path.join("database", "names.csv"))
+
         self.lst_names = [""] + names["name"].tolist()
         
         self.frames = []
@@ -47,12 +50,18 @@ class ServerUI(tk.Tk):
         self.show_frame(0)
 
     def show_frame(self, i):
+        """
+        Show page
+        """
         frame = self.frames[i]
         frame.tkraise()
 
 
 class StartPage(tk.Frame):
     def __init__(self, parent, controller, name=""):
+        """
+        Main page that directs to all the other pages
+        """
         names = pd.read_csv(os.path.join("database", "names.csv"))
         self.lst_names = [""] + names["name"].tolist()
        
@@ -81,11 +90,17 @@ class StartPage(tk.Frame):
 
 
     def get_names(self):
+        """
+        Gets all names
+        """
         return names["name"].tolist()
 
 
 class PageOne(tk.Frame):
     def __init__(self, parent, controller, name):
+        """
+        Initiates the name page including a table of history, searching option and also editing options
+        """
         tk.Frame.__init__(self, parent)
         self.name = name
         self.data = data[name]
@@ -112,9 +127,7 @@ class PageOne(tk.Frame):
                             command= self.update_table)
         button2_refresh.pack(fill="y", side="right", padx=10, pady=10)
         
-            
-        btn_rename = tk.Button(frame1, text="Rename", command=self.update_customer_name)
-        btn_rename.pack(pady=10)
+
 
         label = tk.Label(frame1, text=f"{name}", font=LARGE_FONT)
         label.pack(side="bottom", pady=10, padx=10)
@@ -236,6 +249,9 @@ class PageOne(tk.Frame):
         btn_clear_entries.grid(columnspan=3, sticky="ew", padx=5, pady=3)
 
     def hide_time(self):
+        """
+        When permanent or blocked is enabled disables use of time entries
+        """
         if self.perm_val.get():
             self.ent_start.configure(state="disabled")
             self.ent_end.configure(state="disabled")
@@ -244,6 +260,9 @@ class PageOne(tk.Frame):
             self.ent_end.configure(state="normal")
 
     def treeview_sort_column(self, col, reverse):
+        """
+        Sorts rows
+        """
         l = [(self.trv.set(k, col), k) for k in self.trv.get_children('')]
         l.sort(reverse=reverse)
 
@@ -256,6 +275,9 @@ class PageOne(tk.Frame):
             col, command=lambda _col=col: self.treeview_sort_column(_col, not reverse))
 
     def hide_perm(self):
+        """
+        When blocked is enabled disables use of perm entries
+        """
         if self.blocked_val.get():
             self.check_box_perm.configure(state="normal")
             self.ent_start.configure(state="normal")
@@ -266,6 +288,9 @@ class PageOne(tk.Frame):
             self.ent_end.configure(state="disabled")
 
     def clear_entries(self):
+        """
+        Clear entries
+        """
         self.ent_id.delete(0, END)
         self.ent_url.delete(0, END)
         self.ent_name.delete(0, END)
@@ -274,21 +299,10 @@ class PageOne(tk.Frame):
         self.ent_end.delete(0, END)
 
     def delete_site(self):
+        """
+        Deletes the selected site from table, if the site was blocked it unblocks the site 
+        """
         site_id = self.id_val.get()
-        url = self.url_val.get()
-        start = self.start_val.get()
-        end = self.end_val.get()
-        if messagebox.askyesno("Confirm Delete?", "Are you sure you want to delete this site?"):
-            self.data = self.data[self.data.index != int(site_id)]
-            self.data.to_csv(os.path.join(
-                "database", "customer", f"{self.name}.csv"), index=False)
-            self.update_table()
-            self.clear_entries()
-            Server.limitation("remove url", url, start, end)
-        else:
-            return True
-
-    def add_site(self):
         url = self.url_val.get()
         name = self.name_val.get()
         date = self.date_val.get()
@@ -296,28 +310,76 @@ class PageOne(tk.Frame):
         perm = self.perm_val.get()
         start = self.start_val.get()
         end = self.end_val.get()
-
-        if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
-            if blocked == "True":
-                if self.is_valid_url(url):
-                    if perm == True:
-                        Server.limitation("add url", url, 0, 23)
-                    else:
-                        Server.limitation("add url", url, start, end)
-                else:
-                    messagebox.showerror(
-                        "Not Valid URL", "The URL you entered is invalid please try again!")
-
-            self.data = self.data.append({"url": url, "name": name, "date": date, "blocked": blocked,
-                                          "perm": perm, "start": start, "end": end}, ignore_index=True)
-            self.data.to_csv(os.path.join("database", "customer",
-                                          f"{self.name}.csv"), index=False)
+       
+        new_row={}
+        df_changes= pd.read_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"))
+        if messagebox.askyesno("Confirm Delete?", "Are you sure you want to delete this site?"):
+            if blocked==True:
+                self.server.limitation("remove url", url, 0, 0)
+                
+            new_row = {"url":url, "name":name, "date":date, "blocked":"delete", "perm":False, "start":0, "end":0}
+            if not df_changes.isin([url]).any().any():# if not exists
+                df_changes = df_changes.append(new_row, ignore_index=True)
+            else:
+                df_changes.loc[df_changes["url"]== url,"blocked"]="delete"
+                df_changes.loc[df_changes["url"]== url,"perm"]=False
+                df_changes.loc[df_changes["url"]== url,"start"]=0
+                df_changes.loc[df_changes["url"]== url,"end"]=23
+                
+            df_changes.to_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"),index=False)
+            self.data = self.data[self.data.index != int(site_id)]
+            self.data.to_csv(os.path.join("database", "customers",f"{self.name}","history.csv"), index=False)#TODO change addres
             self.update_table()
             self.clear_entries()
-        else:
-            return True
+    
+    def add_site(self):
+        """
+        Adds new site to table
+        """
+        url = self.url_val.get()
+        name = self.name_val.get()
+        date = self.date_val.get()
+        blocked = self.blocked_val.get()
+        perm = self.perm_val.get()
+        start = self.start_val.get()
+        end = self.end_val.get()
+        
+        df_changes= pd.read_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"))
+        new_row={}
+        if messagebox.askyesno("Confirm Addition?", "Are you sure you want to add this site?"):
+            if blocked == True:
+                if self.is_valid_url(url):
+                    if perm == True:
+                        start=0
+                        end=23
+                        
+                    print("send limit to server")  
+                    self.server.limitation("add url", url, start, end)  
+                    new_row={"url":url, "name":name, "date":date, "blocked":blocked,"perm":perm, "start":int(start), "end":int(end)}            
+                else:
+                    messagebox.showerror( "Not Valid URL", "The URL you entered is invalid please try again!")
+            else:
+                new_row={"url":url, "name":name, "date":date, "blocked":False,"perm":False, "start":0, "end":0}
+            
+            
+            if not df_changes.isin([url]).any().any():# if not exists
+                df_changes = df_changes.append(new_row, ignore_index=True)
+            else:# change if  exists
+                df_changes.loc[df_changes["url"]== url,"blocked"]=blocked
+                df_changes.loc[df_changes["url"]== url,"perm"]=perm
+                df_changes.loc[df_changes["url"]== url,"start"]=start
+                df_changes.loc[df_changes["url"]== url,"end"]=end  
+                       
+            df_changes.to_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"),index=False) 
+            self.update_table()
+            self.clear_entries()
+            time.sleep(0.5)
+ 
 
     def update_site(self):
+        """
+        Updates site according to what the access manager had decided
+        """
         id = self.id_val.get()
         url = self.url_val.get()
         name = self.name_val.get()
@@ -325,42 +387,58 @@ class PageOne(tk.Frame):
         blocked = self.blocked_val.get()
         perm = self.perm_val.get()
         start = self.start_val.get()
-        end = self.end_val.get()
-
+        end =self.end_val.get()
+        df_changes= pd.read_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"))
+        new_row={}
         if id != "":
             if messagebox.askyesno("Confirm Update?", "Are you sure you want to update this site?\nMake sure the ID matches the record."):
-                if (blocked == True) and (self.data.loc[self.data.index == int(id), "blocked"] == False).values[0]:
-                    if self.is_valid_url(url):
+                if (blocked == True) and ((self.data.loc[self.data.index == int(id), "blocked"]).tolist()[0] == False):
+                    if self.is_valid_url(url)==True:
                         if perm == True:
-                            self.server.limitation("add url", url, 0, 23)# TODO update csv
+                            start=0
+                            end=23
+                        
+                        print("send limit to server")
+                        self.server.limitation("add url", url, start, end)  
+                        new_row={"url":url, "name":name, "date":date, "blocked":blocked,"perm":perm, "start":int(start), "end":int(end)}
+                        if not df_changes.isin([url]).any().any():
+                            df_changes = df_changes.append(new_row, ignore_index=True)
                         else:
-                            self.server.limitation("add url", url, start, end)
+                            df_changes.loc[df_changes["url"]== url,"blocked"]=blocked
+                            df_changes.loc[df_changes["url"]== url,"perm"]=perm
+                            df_changes.loc[df_changes["url"]== url,"start"]=start
+                            df_changes.loc[df_changes["url"]== url,"end"]=end                               
                     else:
-                        messagebox.showerror(
-                            "Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
-                elif (blocked == False) and (self.data.loc[self.data.index == int(id), "blocked"] == True).value[0]:
-                    self.server.limitation("remove url", url, start, end)
-
-                self.data.loc[self.data.index == int(id), ["url", "name", "date", "blocked",
-                                                           "perm", "start", "end"]] = [url, name, date, blocked, perm, start, end]
-                self.data.to_csv(os.path.join(
-                    "database", "customer", f"{self.name}.csv"), index=False)
+                        messagebox.showerror("Not Valid URL", "The URL you entered is invalid please try again! Make sure you don't forget http://.")
+                elif (blocked == False) and ((self.data.loc[self.data.index == int(id), "blocked"]).tolist()[0]  == True):
+                    print("sending remove")
+                    self.server.limitation("remove url", url, 0, 0)
+                    df_changes.loc[df_changes["url"]== url,"blocked"]=False
+                    df_changes.loc[df_changes["url"]== url,"perm"]=False
+                    df_changes.loc[df_changes["url"]== url,"start"]=0
+                    df_changes.loc[df_changes["url"]== url,"end"]=0
+                    
+                df_changes.to_csv(os.path.join("database", "customers",f"{self.name}","changes.csv"),index=False)
                 self.update_table()
-                self.clear_entries()
-            else:
-                return True
+                self.clear_entries() 
+                time.sleep(1)           
         else:
-            messagebox.showerror("Invalid Input",
-                                 "Please select a record (or change ID value) to update the record.")
+            messagebox.showerror("Invalid Input", "Please select a record (or change ID value) to update the record.")
 
     def get_row(self, event):
+        """
+        Gets selected row 
+        """
         item = self.trv.item(self.trv.focus())
-        self.id_val.set(item["values"][0])
+        try:
+            self.id_val.set(item["values"][0])
+        except IndexError:
+            pass
         self.url_val.set(item["values"][1])
         self.name_val.set(item["values"][2])
         self.date_val.set(item["values"][3])
-        self.blocked_val.set(item["values"][4])
-        self.perm_val.set(item["values"][5])
+        self.blocked_val.set(bool(item["values"][4]))
+        self.perm_val.set(bool(item["values"][5]))
         self.start_val.set(item["values"][6])
         self.end_val.set(item["values"][7])
 
@@ -368,16 +446,24 @@ class PageOne(tk.Frame):
         self.hide_time()
 
     def update_table(self):
+        """
+        Refreshes the table
+        """
         self.update(self.data.itertuples())
 
     def search(self):
+        """
+        Shows the row that matched the search
+        """
         search_val2 = self.search_val.get()
         possible = self.data[self.data["name"].str.contains(search_val2)]
         self.update(possible.itertuples())
 
     def update(self, rows):
-        table=pd.read_csv(
-        os.path.join("database", "customer", f"{self.name}.csv"))
+        """
+        Updates the table
+        """
+        table=pd.read_csv(os.path.join("database", "customers", f"{self.name}","history.csv"))
         if not table.empty:
             self.data=table
 
@@ -392,38 +478,68 @@ class PageOne(tk.Frame):
         self.trv.tag_configure("odd", background="#fff0f5")
 
     def is_valid_url(self, url):
+        """
+        Checks if url is valid
+        Returns:
+            True if valid
+        """
         try:
             request.urlopen(url)
         except Exception:
             return False
-
+        
         return True
 
-    def update_customer_name(self):  # this func will be change customer_name
-        new_name = "None"  # TODO Need to get somewhere the new name
-        Server.customers_names[self.name] = new_name # update it to server.py
-        names.loc[names["name"] == self.name, "name"] = new_name
-        os.rename(os.path.join("database", "customer", f"{self.name}.csv"), os.path.join(
-            "database", "customer", f"{new_name}.csv"))
-        names.to_csv(os.path.join('database', "names.csv"), index=False)
-        self.name = new_name
+
 def ui():
+    """
+    Initiates the user interface
+    """
+    
     time.sleep(7)
-    for file in os.listdir(os.path.join("database", "customer")):
-        filename = file.split(".")[0]
-        data[filename] = pd.read_csv(
-            os.path.join("database", "customer", f"{file}"))
-        data[filename] = data[filename].fillna("")        
+    path = os.path.join("database", "customers")
+    files = []
+    # r=root, d=directories, f = files
+    for r, d, f in os.walk(path):
+        for file in f:
+            if 'history.csv' in file:
+                files.append(os.path.join(r, file))
+    for f in files:
+        user_name=f.split("\\")[2]
+        data[user_name]=pd.read_csv(f)
+        #data[user_name] = data[user_name].fillna("")   
+            
     app = ServerUI()
     app.title("Access Manager")
     app.geometry("1600x900")
     app.mainloop()
 
 def server_py():
+    """
+    Initiates the Server.py
+    """
+    time.sleep(5)
     global server
     server=Server()
     server.get_requests()
-
+  
+def find_connection():
+    """
+    Find  ip for connection
+    """
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    # Set a timeout so the socket does not block
+    # indefinitely when trying to receive data.
+    server.settimeout(0.2)
+    server.bind(("", 44444))
+    message = b"your very important message"
+    while True:
+        server.sendto(message, ('<broadcast>', 37020))
+        # print("message sent!")
+        time.sleep(0.1)
+        
 if __name__ == "__main__":
     Thread(target = ui).start()
+    Thread(target = find_connection).start()
     Thread(target = server_py).start()
