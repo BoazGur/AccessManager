@@ -23,7 +23,8 @@ def operating_system():#TODO add startup capability
     if os_name == "Linux":
         default_folder = linux_host
     elif os_name == "Windows":
-        default_folder = window_host    
+        default_folder = window_host     
+        
 
 class Client():  # TODO: ip working,make it exe,always on - turns on restart, all print() wiil be deleted
     def __init__(self, port=8810, ip=""):  # ip wiil change
