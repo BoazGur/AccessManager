@@ -538,6 +538,7 @@ def find_connection():
         server.sendto(message, ('<broadcast>', 37020))
         # print("message sent!")
         time.sleep(0.1)
+
         
 if __name__ == "__main__":
     Thread(target = ui).start()

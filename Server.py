@@ -29,7 +29,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
        
     def get_requests(self):
         """
-        main function in the class,creation of rlist wlist xlist ,calls to self.receive() self.respond() that call to other functions.
+        main function in the class,creation of rlist wlist xlist ,calls to self.receive() self.respond() that calls to other functions.
         """
         while True:
             self.rlist, self.wlist, self.xlist = select.select([self.server_socket] + self.open_client_sockets, self.open_client_sockets, [])
@@ -39,8 +39,8 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
 
     def receive(self):
         """
-        if socket try to connect receive create connection, 
-        if socket already exists it receive the data and append the info to messages_to_send the answer to data will be in respond function
+        if socket try to connect receive creates the connection, 
+        if socket already exists it receive the data and append the info to messages_to_send. The answer to data will be in respond function
         """
         for self.current_socket in self.rlist:
             if self.current_socket is self.server_socket:
@@ -80,7 +80,7 @@ class Server():  # TODO: ip working,make it exe,always on - turns on restart
         create connection between server and client
         """
         connection, client_address = self.current_socket.accept()
-        self.print_message("has joined!", client_address)
+        self.print_message("has joined!", client_address)# to be deleted
         self.open_client_sockets.append(connection)
         return connection
 

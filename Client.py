@@ -46,7 +46,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
             try:
                 self.s.connect((self.ip,self.port))
                 self.first_message()
-            except Exception as e:
+            except Exception:
                 print("waiting to server to come up")    
             else:
                 break
@@ -83,7 +83,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
             print(f"message is {message}")
             request = message.split("^^^")
             if request[0]== "add url":
-                if request[1][-1]=="/":
+                if request[1][-1]=="/": # to remove the / in the end of address
                         request[1]=request[1][0:-1]
                 if request[1].startswith("www.",6,10):    
                     self.sites_to_block.append([request[1],request[2],request[3]])               
@@ -130,7 +130,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                 
     def block_websites(self):
         """
-        The following function reads the hostfile and deaped on the time giving in UI it adds url or remove one. adding url 127.0.0.1 wiil redirects the url and  makes the site block
+        The following function reads the hostfile and depend on the time giving in UI, it adds url or remove one. adding url 127.0.0.1 wiil redirect the url and cause the site to be blocked
         """ 
         for websites in self.sites_to_block:
             if websites[1]==-1 and websites[2]==-1:
@@ -176,8 +176,7 @@ class Client():  # TODO: ip working,make it exe,always on - turns on restart, al
                 break
         time.sleep(2)
         self.run()
-                
-        
+                   
 def main():
     operating_system()
     client = Client()
